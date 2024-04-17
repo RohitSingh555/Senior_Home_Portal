@@ -1,0 +1,14 @@
+<!-- add_resident.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Add Resident{% endblock %}
+
+{% block content %}
+<h1>Add Resident</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }} <!-- This will render the form fields -->
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

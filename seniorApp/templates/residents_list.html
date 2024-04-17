@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Residents</h1>
+<div class="table-responsive">
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th class="text-nowrap">Sr No.</th>
+            <th class="text-nowrap">Actions</th>
+            <th class="text-nowrap">ID</th>
+            <th class="text-nowrap">First Name</th>
+            <th class="text-nowrap">Last Name</th>
+            <th class="text-nowrap">Contact Name</th>
+            <th class="text-nowrap">Relation 1</th>
+            {% comment %} <th class="text-nowrap">Contact Name 2</th>
+            <th class="text-nowrap">Relation 2</th> {% endcomment %}
+            {% comment %} <th class="text-nowrap">Security Deposit</th>
+            <th class="text-nowrap">Address</th>
+            <th class="text-nowrap">City</th>
+            <th class="text-nowrap">Province</th>
+            <th class="text-nowrap">Postal Code</th> {% endcomment %}
+            <th class="text-nowrap">Phone Number</th>
+            {% comment %} <th class="text-nowrap">Work Number</th>
+            <th class="text-nowrap">Cell Number</th>
+            <th class="text-nowrap">Fax Number</th>
+            <th class="text-nowrap">Email Address</th>
+            <th class="text-nowrap">Address Contact 2</th>
+            <th class="text-nowrap">City Contact 2</th>
+            <th class="text-nowrap">Province Contact 2</th>
+            <th class="text-nowrap">Postal Code Contact 2</th>
+            <th class="text-nowrap">Phone Number Contact 2</th>
+            <th class="text-nowrap">Work Number Contact 2</th>
+            <th class="text-nowrap">Cell Number Contact 2</th>
+            <th class="text-nowrap">Fax Number Contact 2</th>
+            <th class="text-nowrap">Email Address Contact 2</th>
+            <th class="text-nowrap">Notes</th>
+            <th class="text-nowrap">Room Number</th>
+            <th class="text-nowrap">OHIP</th>
+            <th class="text-nowrap">Date of Birth</th>
+            <th class="text-nowrap">DNR</th>
+            <th class="text-nowrap">Allergies</th>
+            <th class="text-nowrap">Allergies Info</th>
+            <th class="text-nowrap">Medical History</th>
+            <th class="text-nowrap">Weight Last</th>
+            <th class="text-nowrap">Blood Pressure Last</th> {% endcomment %}
+            <th class="text-nowrap">Admission Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for resident in residents %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                <div class="btn-group d-flex flex-column " role="group">
+                    <!-- View Button -->
+                    <a href="{% url 'resident_detail' resident_id=resident.resident_id %}" class="btn btn-primary d-flex text-nowrap mb-2 ">
+                        <i class="bi bi-eye"></i>&nbsp; View
+                    </a>
+                    <!-- Edit Button -->
+                    
+                </div>
+            </td>
+            
+            <td>{{ resident.resident_id }}</td>
+            <td>{{ resident.resident_first_name }}</td>
+            <td>{{ resident.resident_last_name }}</td>
+            <td>{{ resident.contact_name }}</td>
+            <td>{{ resident.relation1 }}</td>
+            {% comment %} <td>{{ resident.contact_name2 }}</td>
+            <td>{{ resident.relation2 }}</td> {% endcomment %}
+            {% comment %} <td>{{ resident.security_deposit }}</td>
+            <td>{{ resident.address }}</td>
+            <td>{{ resident.city }}</td>
+            <td>{{ resident.province }}</td>
+            <td>{{ resident.postal_code }}</td> {% endcomment %}
+            <td>{{ resident.phone_number }}</td>
+            {% comment %} <td>{{ resident.work_number }}</td>
+            <td>{{ resident.cell_number }}</td>
+            <td>{{ resident.fax_number }}</td>
+            <td>{{ resident.email_address }}</td>
+            <td>{{ resident.address_contact2 }}</td>
+            <td>{{ resident.city_contact2 }}</td>
+            <td>{{ resident.province_contact2 }}</td>
+            <td>{{ resident.postal_code_contact2 }}</td>
+            <td>{{ resident.phone_number_contact2 }}</td>
+            <td>{{ resident.work_number_contact2 }}</td>
+            <td>{{ resident.cell_number_contact2 }}</td>
+            <td>{{ resident.fax_number_contact2 }}</td>
+            <td>{{ resident.email_address_contact2 }}</td>
+            <td>{{ resident.notes }}</td>
+            <td>{{ resident.room_number }}</td>
+            <td>{{ resident.ohip }}</td>
+            <td>{{ resident.date_of_birth }}</td>
+            <td>{{ resident.dnr }}</td>
+            <td>{{ resident.allergies }}</td>
+            <td>{{ resident.allergies_info }}</td>
+            <td>{{ resident.medical_history }}</td>
+            <td>{{ resident.weight_last }}</td>
+            <td>{{ resident.blood_pressure_last }}</td> {% endcomment %}
+            <td>{{ resident.admission_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}
