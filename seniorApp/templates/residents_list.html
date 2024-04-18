@@ -2,12 +2,14 @@
 
 {% block content %}
 <h1>Residents</h1>
+<div class="d-flex justify-content-between ">
+<i class="bi bi-search pr-3" style="font-size:30px;"></i><input type="text" id="searchInput" class="form-control mb-3" placeholder="Search residents...">
+</div>
 <div class="table-responsive">
-<table class="table table-striped table-bordered">
+<table class="table table-striped table-bordered" id="residentTable">
     <thead class="thead-dark">
         <tr>
             <th class="text-nowrap">Sr No.</th>
-            <th class="text-nowrap">Actions</th>
             <th class="text-nowrap">ID</th>
             <th class="text-nowrap">First Name</th>
             <th class="text-nowrap">Last Name</th>
@@ -45,23 +47,13 @@
             <th class="text-nowrap">Weight Last</th>
             <th class="text-nowrap">Blood Pressure Last</th> {% endcomment %}
             <th class="text-nowrap">Admission Date</th>
+            <th class="text-nowrap">Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for resident in residents %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>
-                <div class="btn-group d-flex flex-column " role="group">
-                    <!-- View Button -->
-                    <a href="{% url 'resident_detail' resident_id=resident.resident_id %}" class="btn btn-primary d-flex text-nowrap mb-2 ">
-                        <i class="bi bi-eye"></i>&nbsp; View
-                    </a>
-                    <!-- Edit Button -->
-                    
-                </div>
-            </td>
-            
             <td>{{ resident.resident_id }}</td>
             <td>{{ resident.resident_first_name }}</td>
             <td>{{ resident.resident_last_name }}</td>
@@ -99,9 +91,50 @@
             <td>{{ resident.weight_last }}</td>
             <td>{{ resident.blood_pressure_last }}</td> {% endcomment %}
             <td>{{ resident.admission_date }}</td>
+            <td>
+                <div class="btn-group d-flex flex-column " role="group">
+                    <!-- View Button -->
+                    <a href="{% url 'resident_detail' resident_id=resident.resident_id %}" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
+                        <i class="bi bi-eye"></i>&nbsp; View
+                    </a>
+                    <!-- Edit Button -->
+                    
+                </div>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 </div>
+{% comment %} <div class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-primary mr-2">&laquo; Previous</a>
+    {% endif %}
+    
+    <span class="current-page">{{ page_obj.number }}</span>
+    
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-primary ml-2">Next &raquo;</a>
+    {% endif %}
+</div> {% endcomment %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const residentTable = document.getElementById('residentTable');
+        const rows = residentTable.getElementsByTagName('tr');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            for (let i = 1; i < rows.length; i++) {
+                const residentData = rows[i].textContent.toLowerCase();
+                if (residentData.includes(query)) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        });
+    });
+    </script>
 {% endblock %}

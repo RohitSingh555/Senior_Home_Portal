@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +12,38 @@
 </head>
 <body>
     <style>
+        .form-container{
+            border: 2px solid gray;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .form-container form input,.form-container form textarea,.form-container input,.form-container textarea{
+            padding-left: 10px;
+            width: 100%;
+            border-radius:5px;
+            border: 1px solid #ccc;
+        }
+        .form-container form textarea,.form-container textarea{
+            height: 100px;
+        }
+        tr td{
+            padding: 5px !important;
+            vertical-align: middle !important;
+        }
+        input[type=checkbox] {
+            scale: 1.6;
+            align-items: start;
+       }
+        td button:hover{
+            scale: 1.2;
+        }
+        #success-message{
+            position: absolute;
+            top:4%;
+            right:0%;
+                }
         .form-container {
-            width: 100%%
+            width: 100%;
             margin: 0 auto;
           }
           
@@ -50,39 +81,49 @@
           .form-container button:hover {
             background-color: #0056b3;
           }
+
+          .nav-link{
+            font-size: 20px;
+            margin-right: 20px;
+            padding:4px;
+          }
     </style>
-    <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="/">L'Chaim Retirement Homes Inc.</a>
+    <div class="container-2xl">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">
+                <img style="width:150px;" src="{% static 'logo.png' %}" alt="Logo">
+            </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-    
+        
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item ">
                         <a class="nav-link" href="/">Residents</a>
                     </li>
-                    <!-- Add a dropdown button for managing residents -->
-                    <li class="nav-item active">
-                        <a class="nav-link btn btn-primary  d-flex text-nowrap justify-content-center text-white " href="{% url 'add_resident' %}" >
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-light btn-sm text-black-50 " href="{% url 'add_resident' %}">
                             Add Resident
                         </a>
                     </li>
-                    <!-- <li class="nav-item dropdown">
+                    <!-- Dropdown example (if needed) -->
+                    <!--
+                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Add Resident
+                            Manage Residents
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'add_resident' %}">Add Resident</a>
                             <a class="dropdown-item" href="#">View Residents</a>
                         </div>
-                    </li>  -->
+                    </li>
+                    -->
                 </ul>
             </div>
         </nav>
-
-    <div class="container mt-4">
+        
+    <div class="container-2xl px-4 mt-4">
         {% block content %}
         {% endblock %}
     </div>

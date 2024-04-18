@@ -5,8 +5,8 @@
 {% block title %}Add Resident{% endblock %}
 
 {% block content %}
-<h1>Add Resident</h1>
-<form method="post">
+<h1 class="text-center pb-5">Add Resident</h1>
+<form method="post" class="form-container container" style="width:50%; margin:auto;">
     {% csrf_token %}
     {{ form.as_p }} <!-- This will render the form fields -->
     <button type="submit" class="btn btn-primary">Submit</button>

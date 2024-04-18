@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Report</title>
+    <title>Yearly Report</title>
     <style>
         /* Add your custom CSS styles here */
         body {
@@ -14,52 +15,121 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 {
-            text-align: center;
-        }
-        .report-details {
+        .resident-details {
             margin-bottom: 20px;
         }
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .summary-table th, .summary-table td {
-            border: 1px solid #dddddd;
+        .transaction-table th, .transaction-table td {
+            border: 1px solid #dee2e6;
             padding: 8px;
             text-align: left;
         }
-        .summary-table th {
-            background-color: #f2f2f2;
+        .transaction-table th {
+            background-color: #f8f9fa;
+        }
+        .report-heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .letter-body {
+            margin-top: 30px;
+        }
+        .maroon {
+            color: maroon;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Monthly Report</h1>
-        <div class="report-details">
-            <p><strong>Resident:</strong> {{ resident_name }}</p>
-            <p><strong>Date Range:</strong> {{ start_date }} - {{ end_date }}</p>
+        <div class="letter-body">
+            <div class="d-flex justify-content-around" style="display:flex; justify-content: space-around;">
+                <h2 style="text-align: center; margin-bottom: 30px; color: maroon; font-weight: bold;"><h1 class="report-heading">Report from {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}</h1><img style="width:250px; padding-top:20px" src="{% static 'logo.png' %}"></h2>
+                <div class="address text-center">
+                    <h5 style="color: maroon;">L'Chaim Retirement Homes Inc.</h5>
+                    <p><i class="bi bi-geo-alt-fill"></i> 718 Sheppard Avenue West</p>
+                    <p><i class="bi bi-geo-alt-fill"></i> Toronto, Ontario</p>
+                    <p><i class="bi bi-geo-alt-fill"></i> M3H 2S6</p>
+                    <p><i class="bi bi-telephone-fill"></i> Tel: 416-398-7898</p>
+                    <p><i class="bi bi-printer-fill"></i> Fax: 416-398-3909</p>
+                </div>
+            </div>
+
+            <p class="maroon">To Whom it may concern,</p>
+            <p>had paid to L'Chaim Retirememtn Home the total</p>
+            <p><span class="text-dark font-weight-bold h5">$&nbsp;{{ total_amount|floatformat:"2" }}</span> <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
+            <p>{{ today|date:"l, F d, Y" }}</p>
+            {% comment %} <br>
+            <h2>Total Cost</h2> {% endcomment %}
+            {% comment %} <table class="table transaction-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in rental_fees %}
+                    <tr>
+                        <td>{{ fee.date }}</td>
+                        <td>{{ fee.amount }}&nbsp;$</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table> {% endcomment %}
+            <table class="table transaction-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Total Petty Amount</th>
+                        <th>Total Rent Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>{{total_amount_petty}}</td>
+                        <td>{{total_amount_rental}}&nbsp;$</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+    
+            {% comment %} <h2>Petty Cash Transactions</h2>
+            <table class="table transaction-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in petty_cash_transactions %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.amount }}&nbsp;$</td>
+                        <td>{{ transaction.petty_cash_type }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table> {% endcomment %}
+            
+            <p>L’chaim Retirement Home is a private home that specializes in round the clock 24 hour dementia care in an assisted living environment. We provide our residents with prepared meals, personal care and hygiene, activities, medical and nursing aid which include: Incontinence care, feeding, medication administration, dressing, bathing, toileting, specialized programming for dementia care, behavior management, two person transfers, mechanical lifts, night care and monitoring.</p>
+            <p>Yours truly,</p>
+            <br>
+            <p>Judy Cohen</p>
+            <p>Owner and Manager</p>
+            
+            <p style="text-align: center;">THE RIGHT CHOICE FOR QUALITY LIVING</p>
         </div>
-        <table class="summary-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in transactions %}
-                <tr>
-                    <td>{{ transaction.date }}</td>
-                    <td>{{ transaction.description }}</td>
-                    <td>{{ transaction.amount }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
+    <button id="download-pdf-btn">Download Report</button>
+    <script>
+        document.getElementById("download-pdf-btn").addEventListener("click", function() {
+            var resident_id = "{{ resident.resident_id }}";
+            var date = "{{ date }}";
+        
+            window.location.href = url;
+        });
+    </script>
+    
 </body>
 </html>
