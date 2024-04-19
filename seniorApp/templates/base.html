@@ -13,7 +13,6 @@
 <body>
     <style>
         .form-container{
-            border: 2px solid gray;
             border-radius: 10px;
             padding: 20px;
         }
@@ -26,9 +25,10 @@
         .form-container form textarea,.form-container textarea{
             height: 100px;
         }
-        tr td{
+        tr td,tr th{
             padding: 5px !important;
             vertical-align: middle !important;
+            text-align: center !important;
         }
         input[type=checkbox] {
             scale: 1.6;
@@ -100,7 +100,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item ">
-                        <a class="nav-link" href="/">Residents</a>
+                        <a class="nav-link text-white " href="/">Residents</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link btn btn-light btn-sm text-black-50 " href="{% url 'add_resident' %}">

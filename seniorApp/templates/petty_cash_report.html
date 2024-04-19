@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yearly Report</title>
+    <style>
+        /* Add your custom CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .resident-details {
+            margin-bottom: 20px;
+        }
+        .transaction-table th, .transaction-table td {
+            border: 1px solid #dee2e6;
+            padding: 3px;
+            text-align: left;
+        }
+        .transaction-table th {
+            background-color: #f8f9fa;
+        }
+        .report-heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .letter-body {
+            margin-top: 30px;
+        }
+        .maroon {
+            color: maroon;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
+            <tr>
+                <td style="padding: 40px 0px; text-align: center;">
+                    <h1 class="report-heading" style="font-size: 30px; border-top: 5px solid black; border-bottom: 5px solid black; ">Rental Fee Report</h1>
+                    
+                </td>
+                <td>
+                    <img style="width: 150px;padding: 20px; text-align: right;" src="https://www.lchaimretirement.ca/img/lchaim-leaders-logo.png" alt="Logo">
+                    <p class="headertext" style="margin: 0; padding-top: 20px;text-align: right;">718 Sheppard Avenue West Toronto, Ontario M3H 2S6</p>
+                    <p style="margin: 0;text-align: right;">Phone: 416-398-7898 Fax: 416-398-3909</p>
+                </td>
+            </tr>
+        </table>
+        <div class="letter-body" style="font-size:18px;">
+            <p style="padding-top:20px;">{{ date }}</p>
+            <p>Report <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
+                
+                <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
+            <p style="text-align: right; font-weight:bold;">Opening balance: $0<span></p>
+            
+           <table class="table transaction-table">
+            <thead class="thead-light">
+                <tr>
+                    <th class="maroon">Date</th>
+                    <th class="maroon">Type</th>
+                    <th class="maroon">Withdrawal</th>
+                    <th class="maroon">Deposit</th>
+                    <th class="maroon">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in petty_cash_transactions %}
+                <tr>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.petty_cash_type }}</td>
+                    <td>{{ transaction.withdrawl }}&nbsp;$</td>
+                    <td>{{ transaction.deposit }}&nbsp;$</td>
+                    {% comment %} <td>{{ transaction.deposit-transaction.withdrawl }}&nbsp;$</td> {% endcomment %}
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table> 
+    
+            <p  class="maroon" style="text-align: right; font-weight:bold;">Total Amount: ${{total_amount}}</p>
+            <p class="maroon">Signed By: __________________________</p>
+            <p class="maroon">* If you wish to add money to the petty cash account, please forward it to the office. *</p>
+            <br>
+            
+            <p style="text-align: center;">THE RIGHT CHOICE FOR QUALITY LIVING</p>
+        </div>
+    </div>
+    
+</body>
+</html>
+
+
+{% comment %} <h2>Petty Cash Transactions</h2>
+<table class="table transaction-table">
+    <thead class="thead-light">
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in petty_cash_transactions %}
+        <tr>
+            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.amount }}&nbsp;$</td>
+            <td>{{ transaction.petty_cash_type }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table> {% endcomment %}

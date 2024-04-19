@@ -51,10 +51,10 @@
         </tr>
     </thead>
     <tbody>
-        {% for resident in residents %}
+        {% for resident in page_obj %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ resident.resident_id }}</td>
+            <td>{{ resident.id }}</td>
             <td>{{ resident.resident_first_name }}</td>
             <td>{{ resident.resident_last_name }}</td>
             <td>{{ resident.contact_name }}</td>
@@ -94,7 +94,7 @@
             <td>
                 <div class="btn-group d-flex flex-column " role="group">
                     <!-- View Button -->
-                    <a href="{% url 'resident_detail' resident_id=resident.resident_id %}" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
+                    <a href="{% url 'resident_detail' resident_id=resident.id %}" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
                         <i class="bi bi-eye"></i>&nbsp; View
                     </a>
                     <!-- Edit Button -->
@@ -106,35 +106,92 @@
     </tbody>
 </table>
 </div>
-{% comment %} <div class="pagination justify-content-center">
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-primary mr-2">&laquo; Previous</a>
-    {% endif %}
-    
-    <span class="current-page">{{ page_obj.number }}</span>
-    
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-primary ml-2">Next &raquo;</a>
-    {% endif %}
-</div> {% endcomment %}
+<div class="pagination justify-content-center">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+        {% endif %}
 
+        {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const residentTable = document.getElementById('residentTable');
-        const rows = residentTable.getElementsByTagName('tr');
-
+        const tbody = residentTable.querySelector('tbody');
+    
         searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            for (let i = 1; i < rows.length; i++) {
-                const residentData = rows[i].textContent.toLowerCase();
-                if (residentData.includes(query)) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
+            const query = this.value.trim();
+            if (query !== '') {
+                fetch(`/search/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderSearchResults(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching search results:', error);
+                    });
+            } else {
+                // If query is empty, fetch all data
+                fetch('/search/')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderSearchResults(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching all data:', error);
+                    });
             }
         });
+    
+        function renderSearchResults(data) {
+            let html = '';
+            let counter = 1;
+            data.forEach(resident => {
+                html += `
+                    <tr>
+                        <td>${counter}</td>
+                        <td>${resident.id}</td>
+                        <td>${resident.resident_first_name}</td>
+                        <td>${resident.resident_last_name}</td>
+                        <td>${resident.contact_name}</td>
+                        <td>${resident.relation1}</td>
+                        <td>${resident.phone_number}</td>
+                        <td>${resident.admission_date}</td>
+                        <td>
+                            <div class="btn-group d-flex flex-column" role="group">
+                                <a href="/resident/${resident.id}/" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
+                                    <i class="bi bi-eye"></i>&nbsp; View
+                                </a>
+                                <!-- Add other buttons as needed -->
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                counter++;
+            });
+            tbody.innerHTML = html;
+        }
     });
-    </script>
+</script>
+
 {% endblock %}

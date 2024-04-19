@@ -14,11 +14,7 @@
             margin: 20px;
         }
         .container {
-            max-width: 800px;
             margin: 0 auto;
-        }
-        .resident-details {
-            margin-bottom: 20px;
         }
         .transaction-table th, .transaction-table td {
             border: 1px solid #dee2e6;
@@ -28,16 +24,12 @@
         .transaction-table th {
             background-color: #f8f9fa;
         }
-        .report-heading {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .letter-body {
-            margin-top: 30px;
-        }
         .maroon{
             color:maroon;
             font-weight:bold;
+        }
+        .heading_report hr{
+            border: 2px solid gray;
         }
     </style>
 </head>
@@ -93,25 +85,28 @@
 
         <!-- Additional content -->
         <div class="letter-body">
-            <div class="d-flex justify-content-around">
-            <h2 class="report-heading maroon">End of Year Rent Report</h2>
-            <div class="address text-center">
-                <h5 class="maroon">L'Chaim Retirement Homes Inc.</h5>
-                <p><i class="bi bi-geo-alt-fill"></i> 718 Sheppard Avenue West</p>
-                <p><i class="bi bi-geo-alt-fill"></i> Toronto, Ontario</p>
-                <p><i class="bi bi-geo-alt-fill"></i> M3H 2S6</p>
-                <p><i class="bi bi-telephone-fill"></i> Tel: 416-398-7898</p>
-                <p><i class="bi bi-printer-fill"></i> Fax: 416-398-3909</p>
-            </div>
+            <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
+                <tr>
+                    <td style="padding: 40px 0px; text-align: center;">
+                        <h1 class="report-heading" style="font-size: 30px;">End of Year Rent Report</h1>
+                    </td>
+                    <td>
+                        <img style="width: 150px;padding: 20px; text-align: right;" src="https://www.lchaimretirement.ca/img/lchaim-leaders-logo.png" alt="Logo">
+                        <p class="headertext" style="margin: 0; padding-top: 20px;text-align: right;">718 Sheppard Avenue West Toronto, Ontario M3H 2S6</p>
+                        <p style="margin: 0;text-align: right;">Phone: 416-398-7898 Fax: 416-398-3909</p>
+                    </td>
+                </tr>
+            </table>
             
-            
-            </div>
 
-            <p class="maroon">To Whom it may concern,</p>
-            <p>had paid to L'Chaim Retirememtn Home the total</p>
-            <p><span class="text-dark font-weight-bold h5">$&nbsp;{{ total_amount|floatformat:"2" }}</span> <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
-            <p>{{ today|date:"l, F d, Y" }}</p>
-            {% comment %} <table class="table">
+            <div class="report_content" style="font-size:18px;">
+
+            <p style="padding-top:20px;">{{ date }}</p>
+            <p >To Whom it may concern,</p>
+            <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
+            <p>Has paid the total of: <span class="text-dark font-weight-bold h5">$&nbsp;{{ total_amount|floatformat:"2" }}</span></p>
+            <p>to L’chaim Retirement Home for the period spanning <span> {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}.<span>  The breakdown of this amount is as follows:</p>
+                {% comment %} <table class="table">
                 <tbody>
                     {% for fee in rental_fees %}
                     <tr class="maroon">
@@ -129,30 +124,23 @@
                     {% endfor %}
                 </tbody>
             </table> {% endcomment %}
+            <p>Rent: $&nbsp;{{twenty_percent}}</p>
+            <p>Personal Care: $&nbsp;{{sixty_percent}}</p>
+            <p>Food & Utilities: $&nbsp;{{twenty_percent_again}}</p>
 
-            <table class="table transaction-table">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Total Petty Amount</th>
-                        <th>Total Rent Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td>{{total_amount_petty}}&nbsp;$</td>
-                        <td>{{total_amount_rental}}&nbsp;$</td>
-                    </tr>
-                </tbody>
-            </table>
-            <br>
             
-            <p>L’chaim Retirement Home is a private home that specializes in round the clock 24 hour dementia care in an assisted living environment. We provide our residents with prepared meals, personal care and hygiene, activities, medical and nursing aid which include: Incontinence care, feeding, medication administration, dressing, bathing, toileting, specialized programming for dementia care, behavior management, two person transfers, mechanical lifts, night care and monitoring.</p>
+            <p>L’chaim Retirement Home is a private home that specializes in round the clock 24-hour
+                dementia care in an assisted living environment. We provide our residents with
+                prepared meals, personal care and hygiene, activities, medical and nursing aid which 
+                include: Incontinence management, feeding assistance, medication administration, 
+                dressing aid, bathing support, toileting assistance, tailored dementia programming, 
+                behavior management, two-person transfers, mechanical lifts, night supervision and
+                monitoring.</p>
             <p>Yours truly,</p>
-            <br>
             <p>Judy Cohen</p>
             <p>Owner and Manager</p>
             
-            <p class="text-center">THE RIGHT CHOICE FOR QUALITY LIVING</p>
+        </div>
         </div>
     </div>
 </body>

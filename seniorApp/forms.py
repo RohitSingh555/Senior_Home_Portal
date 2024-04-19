@@ -8,6 +8,9 @@ class ResidentForm(forms.ModelForm):
     class Meta:
         model = Residents
         fields = '__all__' 
+    discharge_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    admission_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    date_of_birth = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,12 +23,16 @@ class ResidentForm(forms.ModelForm):
 class RentalFeeForm(forms.ModelForm):
     class Meta:
         model = RentalFee
-        fields = ['amount', 'date', 'month']
+        fields = '__all__' 
+        fields = ['amount','paid', 'date', 'month']
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
 class PettyCashForm(forms.ModelForm):
     class Meta:
         model = PettyCash
-        fields = ['amount', 'petty_cash_type', 'date']
-        
+        fields = ['type', 'deposit', 'withdrawal', 'petty_cash_type', 'date']
+
+    deposit = forms.DecimalField(required=False)
+    withdrawal = forms.DecimalField(required=False)
+    # type = forms.CharField(required=False)
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

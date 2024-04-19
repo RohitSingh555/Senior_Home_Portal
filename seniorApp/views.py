@@ -17,16 +17,42 @@ from django.template.loader import get_template
 from django.template.loader import render_to_string
 from django.db.models import Q
 from django.core.paginator import Paginator
+import decimal
 
 def residents_list(request):
     residents = Residents.objects.all()
-    # paginator = Paginator(residents, 10)
-    # page_number = request.GET.get('page')
-    # page_obj = paginator.get_page(page_number)
-    return render(request, 'residents_list.html', {'residents': residents})
+    paginator = Paginator(residents, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-def resident_detail(request, resident_id):
-    resident = get_object_or_404(Residents, resident_id=resident_id)
+    return render(request, 'residents_list.html', {'page_obj': page_obj})
+
+def search_residents(request):
+    query = request.GET.get('q')
+    residents = Residents.objects.all() 
+
+    if query:  
+        residents = residents.filter(
+            resident_first_name__icontains=query
+        ) | residents.filter(
+            resident_last_name__icontains=query
+        ) | residents.filter(
+            room_number__icontains=query
+        )
+
+    data = [{'resident_id': resident.id,
+             'resident_first_name': resident.resident_first_name,
+             'resident_last_name': resident.resident_last_name,
+             'contact_name': resident.contact_name,
+             'relation1': resident.relation1,
+             'phone_number': resident.phone_number,
+             'admission_date': resident.admission_date,
+             }
+            for resident in residents]
+
+    return JsonResponse(data, safe=False)
+def resident_detail(request, id):
+    resident = get_object_or_404(Residents, id=id)
     petty_cash_types = PettyCashType.objects.all()
 
     if request.method == 'POST':
@@ -36,30 +62,31 @@ def resident_detail(request, resident_id):
             form = RentalFeeForm(request.POST, instance=rental_fee_instance)
             if form.is_valid():
                 form.save()
-                return redirect('resident_detail', resident_id=resident_id)
+                return redirect('resident_detail', id=id)
         else:  # Otherwise, it's a create operation
             form = RentalFeeForm(request.POST)
             if form.is_valid():
                 rental_fee = form.save(commit=False)
                 rental_fee.resident = resident
                 rental_fee.save()
-                return redirect('resident_detail', resident_id=resident_id)
+                return redirect('resident_detail', id=id)
 
         # Handle PettyCash form
         petty_cash_id = request.POST.get('petty_cash_id')
+        print(petty_cash_id)
         if petty_cash_id: 
             petty_cash_instance = get_object_or_404(PettyCash, pk=petty_cash_id)
             petty_form = PettyCashForm(request.POST, instance=petty_cash_instance)
             if petty_form.is_valid():
                 petty_form.save()
-                return redirect('resident_detail', resident_id=resident_id)
+                return redirect('resident_detail', id=id)
         else:  
             petty_form = PettyCashForm(request.POST)
             if petty_form.is_valid():
                 petty_cash = petty_form.save(commit=False)
                 petty_cash.resident = resident
                 petty_cash.save()
-                return redirect('resident_detail', resident_id=resident_id)
+                return redirect('resident_detail', id=id)
         
         # Handle rental fee deletion
         fee_id = request.POST.get('delete_rental_fee_id')
@@ -67,14 +94,14 @@ def resident_detail(request, resident_id):
             fee = get_object_or_404(RentalFee, pk=fee_id)
             fee.delete()
             messages.success(request, 'Rental Fee record deleted successfully.')
-            return redirect('resident_detail', resident_id=resident_id)
+            return redirect('resident_detail', id=id)
         
         petty_cash_id_delete = request.POST.get('petty_cash_id_delete')
         if petty_cash_id_delete:
             petty = get_object_or_404(PettyCash, pk=petty_cash_id_delete)
             petty.delete()
             messages.success(request, 'Petty Cash record deleted successfully.')
-            return redirect('resident_detail', resident_id=resident_id)
+            return redirect('resident_detail', id=id)
 
     else:
         form = RentalFeeForm()
@@ -93,8 +120,8 @@ def add_resident(request):
         form = ResidentForm()
     return render(request, 'add_resident.html', {'form': form})
 
-def edit_resident(request, resident_id):
-    resident = get_object_or_404(Residents, resident_id=resident_id)
+def edit_resident(request, id):
+    resident = get_object_or_404(Residents, resident_id=id)
     if request.method == 'POST':
         form = ResidentForm(request.POST, instance=resident)
         if form.is_valid():
@@ -106,28 +133,33 @@ def edit_resident(request, resident_id):
 
 from django.urls import reverse
 
-def generate_report(request, resident_id):
+def generate_report(request, id):
     startdate_str = request.GET.get('startdate')
     enddate_str = request.GET.get('enddate')
     year_render = request.GET.get('year')
+    petty_render = request.GET.get('petty')
     
     startdate = datetime.strptime(startdate_str, '%Y-%m-%d').date() if startdate_str else None
     enddate = datetime.strptime(enddate_str, '%Y-%m-%d').date() if enddate_str else None
     if startdate:
         if year_render:
-            url = reverse('generate_yearly_pdf', kwargs={'resident_id': resident_id, 'startdate': startdate, 'enddate': enddate})
+            url = reverse('generate_yearly_pdf', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
+            return redirect(url)
+        elif petty_render:
+            url = reverse('generate_pdf_petty', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
             return redirect(url)
         else:
-            url = reverse('generate_pdf', kwargs={'resident_id': resident_id, 'startdate': startdate, 'enddate': enddate})
+            url = reverse('generate_pdf', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
             return redirect(url)
     else:
         return HttpResponse("Please provide a valid date parameter.")
     
 
-def generate_yearly_pdf(request, resident_id, startdate,enddate):
+def generate_yearly_pdf(request, id, startdate,enddate):
+    date = datetime.today().date()
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
     enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
-    resident = get_object_or_404(Residents, resident_id=resident_id)
+    resident = get_object_or_404(Residents, id=id)
     rental_fees = RentalFee.objects.filter(
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
@@ -136,21 +168,33 @@ def generate_yearly_pdf(request, resident_id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.amount for transaction in petty_cash_transactions])
-    total_amount_petty =sum([transaction.amount for transaction in petty_cash_transactions])
-    total_amount_rental = sum([fee.amount for fee in rental_fees]) 
+    
+    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+
+    # Calculate the total deposit and withdrawal
+    total_deposit = sum(deposit_amounts)
+    total_withdrawal = sum(withdrawal_amounts)
+
+    balance = total_deposit - total_withdrawal
+    total_amount = sum([fee.amount for fee in rental_fees]) + balance
+    twenty_percent = total_amount * decimal.Decimal('0.20')
+    sixty_percent = total_amount * decimal.Decimal('0.60')
+    twenty_percent_again = total_amount * decimal.Decimal('0.20')
 
     # Render the PDF with the retrieved data
     template = get_template('yearly_report_template.html')
     context = {
         'resident': resident,
+        'date': date,
         'startdate': startdate_obj,
         'enddate': enddate_obj,
         'rental_fees': rental_fees,
         'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
-        'total_amount_petty': total_amount_petty,
-        'total_amount_rental': total_amount_rental,
+        'twenty_percent': twenty_percent,
+        'sixty_percent': sixty_percent,
+        'twenty_percent_again': twenty_percent_again,
     }
     html = template.render(context)
 
@@ -163,10 +207,11 @@ def generate_yearly_pdf(request, resident_id, startdate,enddate):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def generate_pdf(request, resident_id, startdate,enddate):
+def generate_pdf(request, id, startdate,enddate):
+    date = datetime.today().date()
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
     enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
-    resident = get_object_or_404(Residents, resident_id=resident_id)
+    resident = get_object_or_404(Residents, id=id)
     rental_fees = RentalFee.objects.filter(
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
@@ -175,21 +220,18 @@ def generate_pdf(request, resident_id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.amount for transaction in petty_cash_transactions])
-    total_amount_petty =sum([transaction.amount for transaction in petty_cash_transactions])
-    total_amount_rental = sum([fee.amount for fee in rental_fees]) 
+    total_amount = total_amount = sum([fee.amount for fee in rental_fees])
     
     # Render the PDF with the retrieved data
-    template = get_template('monthly_report_template.html')
+    template = get_template('rental_report.html')
     context = {
         'resident': resident,
+        'date': date,
         'startdate': startdate_obj,
         'enddate': enddate_obj,
         'rental_fees': rental_fees,
         'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
-        'total_amount_petty': total_amount_petty,
-        'total_amount_rental': total_amount_rental,
     }
     html = template.render(context)
 
@@ -202,60 +244,50 @@ def generate_pdf(request, resident_id, startdate,enddate):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-# def generate_monthly_report(request, resident_id):
-#     # Fetch resident object based on the resident_id
-#     resident = Residents.objects.get(pk=resident_id)
+def generate_pdf_petty(request, id, startdate,enddate):
+    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+    date = datetime.today().date()
+    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+    resident = get_object_or_404(Residents, id=id)
+    rental_fees = RentalFee.objects.filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
+    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
 
-#     # Calculate the current month and year
-#     today = date.today()
-#     current_month = today.month
-#     current_year = today.year
+    # Calculate the total deposit and withdrawal
+    total_deposit = sum(deposit_amounts)
+    total_withdrawal = sum(withdrawal_amounts)
+    balance = total_deposit - total_withdrawal
+    
+    # Render the PDF with the retrieved data
+    template = get_template('petty_cash_report.html')
+    context = {
+        'resident': resident,
+        'startdate': startdate_obj,
+        'date': date,
+        'enddate': enddate_obj,
+        'rental_fees': rental_fees,
+        'petty_cash_transactions': petty_cash_transactions,
+        'total_amount': total_amount,
+        'balance': balance,
+    }
+    html = template.render(context)
 
-#     # Calculate the month and year for last year
-#     last_year_month = current_month
-#     last_year = current_year - 1
+    # Generate PDF using xhtml2pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
 
-#     # Create PDF document
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="monthly_report_{resident.resident_first_name}_{resident.resident_last_name}_{current_month}_{current_year}.pdf"'
-#     doc = SimpleDocTemplate(response, pagesize=letter)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
 
-#     # Define styles
-#     styles = getSampleStyleSheet()
-#     style_title = styles["Title"]
-#     style_heading = styles["Heading1"]
-#     style_normal = styles["Normal"]
-
-#     # Create report content
-#     content = []
-
-#     # Title
-#     content.append(Paragraph("Monthly Report", style_title))
-#     content.append(Paragraph(f"Resident: {resident.resident_first_name} {resident.resident_last_name}", style_heading))
-#     content.append(Paragraph(f"Date Range: {current_month}/{current_year} - {last_year_month}/{last_year}", style_heading))
-#     content.append(Paragraph("", style_normal))  # Add some space
-
-#     # Resident Details
-#     content.append(Paragraph("Resident Details:", style_heading))
-#     resident_table_data = [
-#         ["ID", "First Name", "Last Name", "Contact Name", "Relation 1", "Contact Name 2", "Relation 2"],
-#         [resident.resident_id, resident.resident_first_name, resident.resident_last_name, resident.contact_name,
-#          resident.relation1, resident.contact_name2, resident.relation2]
-#     ]
-#     resident_table = Table(resident_table_data, colWidths=[0.5 * inch] * 7)
-#     resident_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-#                                         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-#                                         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-#                                         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-#                                         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-#                                         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-#                                         ('GRID', (0, 0), (-1, -1), 1, colors.black)]))
-#     content.append(resident_table)
-#     content.append(Paragraph("", style_normal))  # Add some space
-
-#     # Add other resident details similarly
-#     # You can use Paragraphs, Tables, or any other reportlab elements to structure the report
-
-#     # Build PDF
-#     doc.build(content)
-#     return response
+def view_my_report(request):
+    return render(request, 'yearly_report_template.html')
