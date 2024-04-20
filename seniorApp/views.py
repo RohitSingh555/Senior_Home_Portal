@@ -22,8 +22,10 @@ import decimal
 def residents_list(request):
     residents = Residents.objects.all()
     paginator = Paginator(residents, 10)
+    
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number or 1)
+    print(page_obj[0].id)
 
     return render(request, 'residents_list.html', {'page_obj': page_obj})
 
@@ -121,7 +123,7 @@ def add_resident(request):
     return render(request, 'add_resident.html', {'form': form})
 
 def edit_resident(request, id):
-    resident = get_object_or_404(Residents, resident_id=id)
+    resident = get_object_or_404(Residents, id=id)
     if request.method == 'POST':
         form = ResidentForm(request.POST, instance=resident)
         if form.is_valid():

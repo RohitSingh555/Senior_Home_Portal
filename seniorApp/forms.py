@@ -27,12 +27,19 @@ class RentalFeeForm(forms.ModelForm):
         fields = ['amount','paid', 'date', 'month']
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
+# class PettyCashForm(forms.ModelForm):
+#     class Meta:
+#         model = PettyCash
+#         fields = ['type', 'deposit', 'withdrawal', 'petty_cash_type', 'date']
+#     deposit = forms.DecimalField(required=False)
+#     withdrawal = forms.DecimalField(required=False)
+#     # type = forms.CharField(required=False)
+#     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+
+
 class PettyCashForm(forms.ModelForm):
     class Meta:
         model = PettyCash
-        fields = ['type', 'deposit', 'withdrawal', 'petty_cash_type', 'date']
-
-    deposit = forms.DecimalField(required=False)
-    withdrawal = forms.DecimalField(required=False)
-    # type = forms.CharField(required=False)
+        fields = ['type', 'deposit', 'withdrawl', 'petty_cash_type', 'date']
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    

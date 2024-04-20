@@ -51,6 +51,8 @@
         </tr>
     </thead>
     <tbody>
+
+       
         {% for resident in page_obj %}
         <tr>
             <td>{{ forloop.counter }}</td>
@@ -94,7 +96,7 @@
             <td>
                 <div class="btn-group d-flex flex-column " role="group">
                     <!-- View Button -->
-                    <a href="{% url 'resident_detail' resident_id=resident.id %}" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
+                    <a href="{% url 'resident_detail' id=resident.id %}" class="btn btn-primary d-flex text-nowrap mb-2 justify-content-center d-flex">
                         <i class="bi bi-eye"></i>&nbsp; View
                     </a>
                     <!-- Edit Button -->
@@ -103,6 +105,7 @@
             </td>
         </tr>
         {% endfor %}
+
     </tbody>
 </table>
 </div>

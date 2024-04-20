@@ -91,7 +91,13 @@
                         {% for petty_cash in resident.pettycash_set.all %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ petty_cash.petty_cash_type.type }}</td>
+                            <td>
+                                {% if petty_cash.deposit %}
+                                -
+                                {% else %}
+                                {{ petty_cash.petty_cash_type.type }}
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if petty_cash.deposit %}
                                     {{ petty_cash.deposit }} $
@@ -100,8 +106,8 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if petty_cash.withdrawal %}
-                                    {{ petty_cash.withdrawal }} $
+                                {% if petty_cash.withdrawl %}
+                                    {{ petty_cash.withdrawl }} $
                                 {% else %}
                                     -
                                 {% endif %}
@@ -135,7 +141,11 @@
                                             {% csrf_token %}
                                             <div class="form-group">
                                                 <label for="id_type">Type:</label>
-                                                 <input class="form-control" readonly value="{{petty_cash.type}}">
+                                                <select name="type" readonly aria-invalid="true" id="id_typer">
+                                                    <option class="form-control"  selected value="{{petty_cash.type}}">{{petty_cash.type}}</option>    
+                                                  
+                                                  </select>
+                                                 
                                             </div>
                                             <div class="form-group">
                                                 {% if petty_cash.type == 'Deposit' %}
@@ -143,16 +153,18 @@
                                                     <input type="number" class="form-control" id="deposit{{ petty_cash.id }}" name="deposit" value="{{ petty_cash.deposit }}">
                                                 {% else %}
                                                     <label for="id_withdrawal{{ petty_cash.id }}">Withdrawal:</label>
-                                                    <input type="number" class="form-control" id="withdrawal{{ petty_cash.id }}" name="withdrawal" value="{{ petty_cash.withdrawal }}">
+                                                    <input type="number" class="form-control" id="withdrawal{{ petty_cash.id }}" name="withdrawal" value="{{ petty_cash.withdrawl }}">
                                                 {% endif %}
                                             </div>
                                             <div class="form-group">
+                                                {% if petty_cash.type == 'Withdrawl' %}
                                                 <label for="petty_cash_type{{ petty_cash.id }}">Petty Cash Type:</label>
                                                 <select class="form-control" id="petty_cash_type{{ petty_cash.id }}" name="petty_cash_type">
                                                     {% for petty_cash_type in petty_cash_types %}
                                                         <option value="{{ petty_cash_type.id }}" {% if petty_cash_type.id == petty_cash.petty_cash_type.id %} selected {% endif %}>{{ petty_cash_type.type }}</option>
                                                     {% endfor %}
                                                 </select>
+                                                {% endif %}
                                             </div>
                                             <div class="form-group">
                                                 <label for="date{{ petty_cash.id }}">Date:</label>
@@ -244,11 +256,39 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="id_month{{ fee.id }}">Month:</label>
-                                                        <input type="text" class="form-control" id="id_month{{ fee.id }}" name="month" value="{{ fee.month }}">
+                                                        <!-- <input type="text" class="form-control" id="id_month{{ fee.id }}" name="month" value="{{ fee.month }}"> -->
+                                                        <select name="month" id="id_month{{ fee.id }}" class="form-control">
+                                                            <option value="Jan" selected="">January</option>
+                                                          
+                                                            <option value="Feb">February</option>
+                                                          
+                                                            <option value="Mar">March</option>
+                                                          
+                                                            <option value="Apr">April</option>
+                                                          
+                                                            <option value="May">May</option>
+                                                          
+                                                            <option value="Jun">June</option>
+                                                          
+                                                            <option value="Jul">July</option>
+                                                          
+                                                            <option value="Aug">August</option>
+                                                          
+                                                            <option value="Sep">September</option>
+                                                          
+                                                            <option value="Oct">October</option>
+                                                          
+                                                            <option value="Nov">November</option>
+                                                          
+                                                            <option value="Dec">December</option>
+                                                          
+                                                          </select>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="id_date{{ fee.id }}">Date:</label>
-                                                        <input type="date" class="form-control" id="id_date{{ fee.id }}" name="date" value="{{ fee.date }}">
+                                                        <!-- <input type="date" class="form-control" id="id_date{{ fee.id }}" name="date" value="{{ fee.date }}"> -->
+                                                        <input type="date" class="form-control" id="date{{ fee.id }}" name="date" value="{{ fee.date|date:'Y-m-d' }}">
+
                                                     </div>
                                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                                 </form>
@@ -367,22 +407,26 @@
     document.addEventListener('DOMContentLoaded', function() {
         const typeField = document.querySelector('#id_type');
         const depositField = document.querySelector('#id_deposit');
-        const withdrawalField = document.querySelector('#id_withdrawal');
+        const withdrawalField = document.querySelector('#id_withdrawl');
+        const pettyCashType = document.querySelector('#id_petty_cash_type')
 
         depositField.style.display = 'none';
-        withdrawalField.style.display = 'none';
+        withdrawalField.style.display = 'block';
 
         typeField.addEventListener('change', function() {
             const selectedValue = this.value;
             if (selectedValue === 'Deposit') {
                 depositField.style.display = 'block';
                 withdrawalField.style.display = 'none';
+                pettyCashType.style.display= 'none'
+
             } else if (selectedValue === 'Withdrawl') {
                 depositField.style.display = 'none';
                 withdrawalField.style.display = 'block';
+                pettyCashType.style.display= 'block'
             } else {
                 depositField.style.display = 'none';
-                withdrawalField.style.display = 'none';
+                withdrawalField.style.display = 'block';
             }
         });
     });
