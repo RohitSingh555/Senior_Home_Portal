@@ -80,6 +80,13 @@ def resident_detail(request, id):
             petty_cash_instance = get_object_or_404(PettyCash, pk=petty_cash_id)
             petty_form = PettyCashForm(request.POST, instance=petty_cash_instance)
             if petty_form.is_valid():
+                if petty_cash_instance.type == 'Withdrawl':
+                    change = petty_cash_instance.withdrawl - petty_form.withdrawl
+                    petty_form.balance = petty_cash_instance.balance + change
+                else: 
+                    change = petty_cash_instance.deposit - petty_form.deposit
+                    petty_form.balance = petty_cash_instance.balance - change
+
                 petty_form.save()
                 return redirect('resident_detail', id=id)
         else:  
@@ -87,6 +94,16 @@ def resident_detail(request, id):
             if petty_form.is_valid():
                 petty_cash = petty_form.save(commit=False)
                 petty_cash.resident = resident
+                if(petty_cash.type == 'Withdrawl'):
+                    if (resident.pettycash_set.all().last()):
+                        petty_cash.balance = resident.pettycash_set.all().last().balance - petty_cash.withdrawl
+                    else:
+                        petty_cash.balance = -1* petty_cash.withdrawl
+                else: 
+                    if (resident.pettycash_set.all().last()):
+                        petty_cash.balance = resident.pettycash_set.all().last().balance + petty_cash.deposit
+                    else:
+                        petty_cash.balance = petty_cash.deposit
                 petty_cash.save()
                 return redirect('resident_detail', id=id)
         

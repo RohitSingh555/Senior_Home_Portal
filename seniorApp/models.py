@@ -61,6 +61,7 @@ class PettyCash(models.Model):
     ]
     type = models.CharField(max_length=20, choices=ACTION_TYPES ,default="")
     withdrawl = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True, default=0)
+    balance = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True, default=0)
     deposit = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True,default=0)
     resident = models.ForeignKey(Residents, on_delete=models.CASCADE)
     petty_cash_type = models.ForeignKey('PettyCashType', on_delete=models.CASCADE, default=1)  # Set default value here
