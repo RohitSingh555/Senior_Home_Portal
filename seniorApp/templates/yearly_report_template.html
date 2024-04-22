@@ -35,55 +35,7 @@
 </head>
 <body>
     <div class="container">
-        {% comment %} <h1 class="report-heading">Report from {{ date }}</h1>
-        <div class="resident-details grid d-grid ">
-            <p><strong>Resident ID:</strong> {{ resident.resident_id }}</p>
-            <p><strong>Name:</strong> {{ resident.resident_first_name }} {{ resident.resident_last_name }}</p>
-            <p><strong>Contact Name:</strong> {{ resident.contact_name }}</p>
-            <p><strong>Relation 1:</strong> {{ resident.relation1 }}</p>
-            <p><strong>Contact Name 2:</strong> {{ resident.contact_name2 }}</p>
-            <p><strong>Relation 2:</strong> {{ resident.relation2 }}</p>
-        </div>
-
-        <h2>Rental Fees</h2>
-        <table class="table transaction-table">
-            <thead class="thead-light">
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for fee in rental_fees %}
-                <tr>
-                    <td>{{ fee.date }}</td>
-                    <td>{{ fee.amount }}&nbsp;$</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h2>Petty Cash Transactions</h2>
-        <table class="table transaction-table">
-            <thead class="thead-light">
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Type</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in petty_cash_transactions %}
-                <tr>
-                    <td>{{ transaction.date }}</td>
-                    <td>{{ transaction.amount }}&nbsp;$</td>
-                    <td>{{ transaction.petty_cash_type }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table> {% endcomment %}
-
-        <!-- Additional content -->
+        
         <div class="letter-body">
             <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
                 <tr>
@@ -106,24 +58,7 @@
             <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
             <p>Has paid the total of: <span class="text-dark font-weight-bold h5">$&nbsp;{{ total_amount|floatformat:"2" }}</span></p>
             <p>to L’chaim Retirement Home for the period spanning <span> {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}.<span>  The breakdown of this amount is as follows:</p>
-                {% comment %} <table class="table">
-                <tbody>
-                    {% for fee in rental_fees %}
-                    <tr class="maroon">
-                        <td class="maroon">The rent amount:</td>
-                        <td class="maroon">${{ fee.amount }}</td>
-                        <td class="maroon">{{ fee.date }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% for transaction in petty_cash_transactions %}
-                    <tr class="maroon">
-                        <td class="maroon">{{ transaction.petty_cash_type }}</td>
-                        <td class="maroon">${{ transaction.amount }}</td>
-                        <td class="maroon">{{ transaction.date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table> {% endcomment %}
+                
             <p>Rent: $&nbsp;{{twenty_percent}}</p>
             <p>Personal Care: $&nbsp;{{sixty_percent}}</p>
             <p>Food & Utilities: $&nbsp;{{twenty_percent_again}}</p>
@@ -139,7 +74,9 @@
             <p>Yours truly,</p>
             <p>Judy Cohen</p>
             <p>Owner and Manager</p>
-            
+            {% if all_paid %}
+            <img style="width: 150px;padding: 20px; text-align: center;" src="https://png.pngtree.com/png-clipart/20230317/original/pngtree-paid-stamp-vector-illustration-png-image_8991938.png" alt="Paid Stamp">
+        {% endif %}
         </div>
         </div>
     </div>

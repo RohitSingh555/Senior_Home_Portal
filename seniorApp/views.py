@@ -18,6 +18,31 @@ from django.template.loader import render_to_string
 from django.db.models import Q
 from django.core.paginator import Paginator
 import decimal
+from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth.views import LoginView, LogoutView
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
+import base64
+from django.core.mail import EmailMessage
+
+def my_login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('/')  # Redirect to the home page after login
+        else:
+            # Return an error message or handle invalid login
+            return render(request, 'login.html', {'error_message': 'Invalid username or password'})
+    else:
+        return render(request, 'login.html')  # Render the login page
+
+def my_logout_view(request):
+    logout(request)
+    return redirect('login')  # Redirect to the login page after logout
 
 def residents_list(request):
     residents = Residents.objects.all()
@@ -25,7 +50,7 @@ def residents_list(request):
     
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number or 1)
-    print(page_obj[0].id)
+    # print(page_obj[0].id)
 
     return render(request, 'residents_list.html', {'page_obj': page_obj})
 
@@ -157,6 +182,10 @@ def generate_report(request, id):
     enddate_str = request.GET.get('enddate')
     year_render = request.GET.get('year')
     petty_render = request.GET.get('petty')
+    send_email_yearly = request.GET.get('sendemail_yearly')
+    send_email_Petty = request.GET.get('sendemail_Petty')
+    print(send_email_Petty)
+    send_email_Rental = request.GET.get('sendemail_Rental')
     
     startdate = datetime.strptime(startdate_str, '%Y-%m-%d').date() if startdate_str else None
     enddate = datetime.strptime(enddate_str, '%Y-%m-%d').date() if enddate_str else None
@@ -167,6 +196,15 @@ def generate_report(request, id):
         elif petty_render:
             url = reverse('generate_pdf_petty', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
             return redirect(url)
+        elif send_email_yearly:
+            url = reverse('sendemail_yearly', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
+            return redirect(url)
+        elif send_email_Petty:
+            url = reverse('sendemail_pdf_petty', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
+            return redirect(url)
+        elif send_email_Rental:
+            url = reverse('sendemail_pdf_rental', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
+            return redirect(url)
         else:
             url = reverse('generate_pdf', kwargs={'id': id, 'startdate': startdate, 'enddate': enddate})
             return redirect(url)
@@ -175,6 +213,149 @@ def generate_report(request, id):
     
 
 def generate_yearly_pdf(request, id, startdate,enddate):
+    date = datetime.today().date()
+    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+    resident = get_object_or_404(Residents, id=id)
+    rental_fees = RentalFee.objects.filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    
+    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+
+    # Calculate the total deposit and withdrawal
+    total_deposit = sum(deposit_amounts)
+    total_withdrawal = sum(withdrawal_amounts)
+
+    balance = total_deposit - total_withdrawal
+    total_amount = sum([fee.amount for fee in rental_fees]) + balance
+    twenty_percent = total_amount * decimal.Decimal('0.20')
+    sixty_percent = total_amount * decimal.Decimal('0.60')
+    twenty_percent_again = total_amount * decimal.Decimal('0.20')
+    # all_paid = all(fee.paid for fee in rental_fees)
+
+    # Render the PDF with the retrieved data
+    template = get_template('yearly_report_template.html')
+    context = {
+        'resident': resident,
+        'date': date,
+        'startdate': startdate_obj,
+        'enddate': enddate_obj,
+        'rental_fees': rental_fees,
+        'petty_cash_transactions': petty_cash_transactions,
+        'total_amount': total_amount,
+        'twenty_percent': twenty_percent,
+        'sixty_percent': sixty_percent,
+        'twenty_percent_again': twenty_percent_again,
+        # 'all_paid': all_paid,
+    }
+    html = template.render(context)
+
+    # Generate PDF using xhtml2pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def generate_pdf(request, id, startdate,enddate):
+    date = datetime.today().date()
+    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+    resident = get_object_or_404(Residents, id=id)
+    rental_fees = RentalFee.objects.filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    total_amount = total_amount = sum([fee.amount for fee in rental_fees])
+    all_paid = all(fee.paid for fee in rental_fees)
+    # Render the PDF with the retrieved data
+    template = get_template('rental_report.html')
+    context = {
+        'resident': resident,
+        'date': date,
+        'startdate': startdate_obj,
+        'enddate': enddate_obj,
+        'rental_fees': rental_fees,
+        'petty_cash_transactions': petty_cash_transactions,
+        'total_amount': total_amount,
+        'all_paid': all_paid,
+    }
+    html = template.render(context)
+
+    # Generate PDF using xhtml2pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def generate_pdf_petty(request, id, startdate,enddate):
+    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+    date = datetime.today().date()
+    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+    resident = get_object_or_404(Residents, id=id)
+    rental_fees = RentalFee.objects.filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
+    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+    # all_paid = all(fee.paid for fee in rental_fees)
+    # Calculate the total deposit and withdrawal
+    total_deposit = sum(deposit_amounts)
+    total_withdrawal = sum(withdrawal_amounts)
+    balance = total_deposit - total_withdrawal
+    closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
+    if closest_previous_balance:
+        closest_previous_balance= closest_previous_balance.balance-balance
+        print(closest_previous_balance)
+    
+    # Render the PDF with the retrieved data
+    template = get_template('petty_cash_report.html')
+    context = {
+        'resident': resident,
+        'startdate': startdate_obj,
+        'date': date,
+        'enddate': enddate_obj,
+        'rental_fees': rental_fees,
+        'petty_cash_transactions': petty_cash_transactions,
+        'total_amount': total_amount,
+        'balance': balance,
+        # 'all_paid': all_paid,
+        'closest_previous_balance': closest_previous_balance,
+    }
+    html = template.render(context)
+
+    # Generate PDF using xhtml2pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def sendemail_yearly(request, id, startdate,enddate):
     date = datetime.today().date()
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
     enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
@@ -218,15 +399,97 @@ def generate_yearly_pdf(request, id, startdate,enddate):
     html = template.render(context)
 
     # Generate PDF using xhtml2pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    pdf_content = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
 
-def generate_pdf(request, id, startdate,enddate):
+    pdf_content.seek(0)
+    # pdf_content = base64.b64encode(pdf_content).decode()
+    
+    # Create the EmailMessage object
+    subject = 'Yearly Report PDF'
+    message = 'Please find attached the Yearly Report PDF for your reference.'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
+
+    email = EmailMessage(subject, message, email_from, recipient_list)
+
+    # Attach the PDF to the email
+    email.attach(f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+
+    # Send the email
+    email.send()
+
+    return HttpResponse('Email sent successfully.')
+
+def sendemail_pdf_petty(request, id, startdate,enddate):
+    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+    date = datetime.today().date()
+    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+    resident = get_object_or_404(Residents, id=id)
+    rental_fees = RentalFee.objects.filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+        resident=resident
+    )
+    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
+    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+    
+    # Calculate the total deposit and withdrawal
+    total_deposit = sum(deposit_amounts)
+    total_withdrawal = sum(withdrawal_amounts)
+    balance = total_deposit - total_withdrawal
+    closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
+    if closest_previous_balance:
+        closest_previous_balance = closest_previous_balance.balance - balance
+    
+    # Render the PDF with the retrieved data
+    template = get_template('petty_cash_report.html')
+    context = {
+        'resident': resident,
+        'startdate': startdate_obj,
+        'date': date,
+        'enddate': enddate_obj,
+        'rental_fees': rental_fees,
+        'petty_cash_transactions': petty_cash_transactions,
+        'total_amount': total_amount,
+        'balance': balance,
+        'closest_previous_balance': closest_previous_balance,
+    }
+    html = template.render(context)
+
+    # Generate PDF using xhtml2pdf
+    pdf_content = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
+    pdf_content.seek(0)
+    # pdf_content = base64.b64encode(pdf_content).decode()
+    
+    # Create the EmailMessage object
+    subject = 'Petty Cash Report'
+    message = 'Please find attached the petty cash report for your reference.'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
+
+    email = EmailMessage(subject, message, email_from, recipient_list)
+
+    # Attach the PDF to the email
+    email.attach(f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+
+    # Send the email
+    email.send()
+
+    return HttpResponse('Email sent successfully.')
+def sendemail_pdf_rental(request, id, startdate,enddate):
     date = datetime.today().date()
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
     enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
@@ -255,58 +518,30 @@ def generate_pdf(request, id, startdate,enddate):
     html = template.render(context)
 
     # Generate PDF using xhtml2pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    pdf_content = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
 
-def generate_pdf_petty(request, id, startdate,enddate):
-    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
-    date = datetime.today().date()
-    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
-    resident = get_object_or_404(Residents, id=id)
-    rental_fees = RentalFee.objects.filter(
-        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-        resident=resident
-    )
-    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
-        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-        resident=resident
-    )
-    total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
-    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
-    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-
-    # Calculate the total deposit and withdrawal
-    total_deposit = sum(deposit_amounts)
-    total_withdrawal = sum(withdrawal_amounts)
-    balance = total_deposit - total_withdrawal
+    pdf_content.seek(0)
+    # pdf_content = base64.b64encode(pdf_content).decode()
     
-    # Render the PDF with the retrieved data
-    template = get_template('petty_cash_report.html')
-    context = {
-        'resident': resident,
-        'startdate': startdate_obj,
-        'date': date,
-        'enddate': enddate_obj,
-        'rental_fees': rental_fees,
-        'petty_cash_transactions': petty_cash_transactions,
-        'total_amount': total_amount,
-        'balance': balance,
-    }
-    html = template.render(context)
+    # Create the EmailMessage object
+    subject = 'Rental fee Report'
+    message = 'Please find attached the Rental fee Report for your reference.'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
 
-    # Generate PDF using xhtml2pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    email = EmailMessage(subject, message, email_from, recipient_list)
 
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # Attach the PDF to the email
+    email.attach(f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+
+    # Send the email
+    email.send()
+
+    return HttpResponse('Email sent successfully.')
 
 def view_my_report(request):
-    return render(request, 'yearly_report_template.html')
+    return render(request, 'petty_cash_report.html')

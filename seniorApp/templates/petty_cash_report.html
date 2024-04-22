@@ -6,90 +6,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yearly Report</title>
     <style>
-        /* Add your custom CSS styles here */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .resident-details {
-            margin-bottom: 20px;
+            font-family: 'Trebuchet MS', sans-serif;
         }
         .transaction-table th, .transaction-table td {
             border: 1px solid #dee2e6;
             padding: 3px;
-            text-align: left;
+            text-align: center;
         }
         .transaction-table th {
-            background-color: #f8f9fa;
+            background-color: #efd82f;
         }
-        .report-heading {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .letter-body {
-            margin-top: 30px;
+    
+        .transaction-table tr:nth-child(odd) {
+            background-color: #f2f2f2; 
         }
         .maroon {
             color: maroon;
             font-weight: bold;
         }
+        .headinghr {
+            border-bottom: 5px solid #efd82f;
+            width: 400px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
+        <table class="heading_section" style="color: white; background-color: #292929; width: 100%;">
             <tr>
                 <td style="padding: 40px 0px; text-align: center;">
-                    <h1 class="report-heading" style="font-size: 30px; border-top: 5px solid black; border-bottom: 5px solid black; ">Petty Cash Invoice</h1>
+                    <h1 class="report-heading" style="font-size: 30px;">Petty Cash Report</h1>
                     
                 </td>
                 <td>
                     <img style="width: 150px;padding: 20px; text-align: right;" src="https://www.lchaimretirement.ca/img/lchaim-leaders-logo.png" alt="Logo">
-                    <p class="headertext" style="margin: 0; padding-top: 20px;text-align: right;">718 Sheppard Avenue West Toronto, Ontario M3H 2S6</p>
-                    <p style="margin: 0;text-align: right;">Phone: 416-398-7898 Fax: 416-398-3909</p>
+                    <p class="headertext" style="margin: 0; text-align: right;padding:20px 10px;">718 Sheppard Avenue West Toronto, Ontario M3H 2S6</p>
+                    <p style="margin: 0;text-align: right;padding:0px 10px;">Phone: 416-398-7898 Fax: 416-398-3909</p>
                 </td>
             </tr>
         </table>
-        <div class="letter-body" style="font-size:18px;">
-            <p style="padding-top:20px;">{{ date }}</p>
-            <p>Report <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
-                
-                <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
-            <p style="text-align: right; font-weight:bold;">Opening balance: $0<span></p>
+        <div class="letter-body" style="font-size:18px; ">
             
-           <table class="table transaction-table">
-            <thead class="thead-light">
-                <tr>
-                    <th class="maroon">Date</th>
-                    <th class="maroon">Type</th>
-                    <th class="maroon">Withdrawal</th>
-                    <th class="maroon">Deposit</th>
-                    <th class="maroon">Balance</th>
+            <h2 style=""><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
+            <p style="">Statement Period From: <span> {{ startdate }} To {{ enddate }}<span></p>
+                
+                {% if closest_previous_balance is not None and closest_previous_balance != 0 %}
+                <p class="headinghr" style="text-align: right; font-weight: bold; padding:10px 40px 0px 40px; font-size:20px;">Previous balance: ${{ closest_previous_balance|stringformat:"s"|slice:"1:" }}</p>
+            {% else %}
+                <p class="headinghr" style="text-align: right; font-weight: bold; padding:10px 40px 0px 40px;">Opening balance: $0</p>
+            {% endif %}
+            
+            
+           <table class="table transaction-table" style="padding:0px 40px;">
+            <thead class="thead-light" style="padding:0px 40px;background-color:warning;">
+                <tr style="padding:0px 40px;">
+                    <th style="padding-top:10px;" >Date</th>
+                    <th style="padding-top:10px;" >Type</th>
+                    <th style="padding-top:10px;" >Withdrawal</th>
+                    <th style="padding-top:10px;" >Deposit</th>
+                    <th style="padding-top:10px;" >Balance</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody style="padding:0px 40px;">
                 {% for transaction in petty_cash_transactions %}
-                <tr>
-                    <td>{{ transaction.date }}</td>
-                    <td>{{ transaction.petty_cash_type }}</td>
-                    <td>{{ transaction.withdrawl }}&nbsp;$</td>
-                    <td>{{ transaction.deposit }}&nbsp;$</td>
-                    {% comment %} <td>{{ transaction.deposit-transaction.withdrawl }}&nbsp;$</td> {% endcomment %}
+                <tr  style="{% cycle 'background-color: #ffffff;' 'background-color: #e7e7e7' %}">
+                    <td style="padding-top:10px;">{{ transaction.date }}</td>
+                    <td style="padding-top:10px;">{{ transaction.petty_cash_type }}</td>
+                    <td style="padding-top:10px;">{{ transaction.withdrawl }}$</td>
+                    <td style="padding-top:10px;">{{ transaction.deposit }}$</td>
+                    <td style="padding-top:10px;">{{ transaction.balance }}$</td>
+
                 </tr>
                 {% endfor %}
             </tbody>
             </table> 
     
-            <p  class="maroon" style="text-align: right; font-weight:bold;">Total Amount: ${{total_amount}}</p>
-            <p class="maroon">Signed By: __________________________</p>
-            <p class="maroon">* If you wish to add money to the petty cash account, please forward it to the office. *</p>
-            <br>
-            
-            <p style="text-align: center;">THE RIGHT CHOICE FOR QUALITY LIVING</p>
+            {% if balance < 0 %}
+    <p class=" headinghr" style="text-align: right; font-weight:bold; padding:10px 40px 0px 40px; width:300px">Amount Due: ${{ balance|stringformat:"s"|slice:"1:" }}</p>
+{% else %}
+    <p class=" headinghr" style="text-align: right; font-weight:bold; padding:10px 40px 0px 40px;">Amount Deposited: ${{ balance|stringformat:"s"|slice:"1:" }}</p>
+{% endif %}
+
+            <p class="maroon" style="padding:0px 40px;">Kindly pay upon receipt. Payments can be made by e-transfer to judy@lchaimretirement.ca or by cheque payable to L'chaim Retirement Home.</p>
+            {% if all_paid %}
+            <img style="width: 150px;padding: 20px; text-align: center;" src="https://png.pngtree.com/png-clipart/20230317/original/pngtree-paid-stamp-vector-illustration-png-image_8991938.png" alt="Paid Stamp">
+        {% endif %}
+            <p style=" font-size:12px">Print date: {{ date }}</p>
         </div>
     </div>
     
@@ -110,7 +113,7 @@
         {% for transaction in petty_cash_transactions %}
         <tr>
             <td>{{ transaction.date }}</td>
-            <td>{{ transaction.amount }}&nbsp;$</td>
+            <td>{{ transaction.amount }}$</td>
             <td>{{ transaction.petty_cash_type }}</td>
         </tr>
         {% endfor %}

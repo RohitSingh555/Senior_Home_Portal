@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include  # Import include() function
+from seniorApp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('seniorApp.urls')),  # Remove the forward slash before include
+    path('login/', views.my_login_view, name='login'),
+    path('logout/', views.my_logout_view, name='logout'),
 ]
 

@@ -116,6 +116,7 @@
                             <td>
                                 <!-- Button to open edit modal -->
                                 <div class="d-flex ">
+                                    {% if forloop.last %}
                                 <button type="button" class="btn mr-2" data-toggle="modal" data-target="#editPettyCashModal{{ petty_cash.id }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
@@ -124,6 +125,7 @@
                                     <input type="hidden" name="petty_cash_id_delete" value="{{ petty_cash.id }}">
                                     <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
                                 </form>
+                                {% endif %}
                                 </div>
                 
                                 <!-- Edit Petty Cash Modal -->
@@ -310,9 +312,35 @@
         </div>
     </div>
 
-    <div class="container pt-5 mx-auto d-flex justify-content-between pb-5 " style="gap:20px;">
-        {% comment %} <a href="{% url 'monthly_report' id=resident.id  %}" class="btn btn-primary">Monthly Report</a> {% endcomment %}
-        <form class="w-100 d-flex flex-column" style="gap:20px;" method="get" action="{% url 'view_report' id=resident.id %}">
+    <div class="px-3 pt-5 mx-auto d-flex justify-content-between pb-5 " style="gap:20px;">
+        <form class="w-100 d-flex flex-column" style="gap:20px;" id="reportFormPetty" method="get" action="{% url 'view_report' id=resident.id %}">
+            <h4 class="text-center ">Petty Cash Report</h4>
+            <div class="form-group">
+                <label >Start Date:</label>
+                <input type="date" class="form-control" name="startdate">
+            </div>
+            <div class="form-group">
+                <label>End Date:</label>
+                <input type="date" class="form-control" name="enddate">
+            </div>
+            <button id="downloadButton" type="submit" class="btn btn-primary" onclick="updateFormAndSubmitPetty('petty')"><i class="bi bi-cloud-download"></i>&nbsp;Download Petty Cash Report PDF</button>
+            <button id="sendEmailButton" type="submit" class="btn btn-info" onclick="updateFormAndSubmitPetty('sendemail_Petty')"><i class="bi bi-envelope"></i>&nbsp;Send as an Email</button>
+        </form>
+        <form class="w-100 d-flex flex-column" style="gap:20px;" id="reportFormYearly" method="get" action="{% url 'view_report' id=resident.id %}">
+            <h4 class="text-center ">Yearly Report</h4>
+            <div class="form-group">
+                <label for="startdate">Start Date:</label>
+                <input type="date" class="form-control" id="startdate" name="startdate">
+            </div>
+            <div class="form-group">
+                <label for="enddate">End Date:</label>
+                <input type="date" class="form-control" id="enddate" name="enddate">
+            </div>
+            <button id="downloadButton" type="submit" class="btn btn-primary" onclick="updateFormAndSubmitYearly('year')"><i class="bi bi-cloud-download"></i>&nbsp;Download Yearly Report PDF</button>
+            <button id="sendEmailButton" type="submit" class="btn btn-info" onclick="updateFormAndSubmitYearly('sendemail_yearly')"><i class="bi bi-envelope"></i>&nbsp;Send as an Email</button>
+        </form>
+        <form class="w-100 d-flex flex-column" style="gap:20px;" id="reportFormRental" method="get" action="{% url 'view_report' id=resident.id %}">
+            <h4 class="text-center ">Rental Fees Report</h4>
             <div class="form-group">
             <label>Start Date:</label>
             <input type="date" class="form-control" name="startdate">
@@ -321,32 +349,40 @@
                 <label>End Date:</label>
                 <input type="date" class="form-control" name="enddate">
             </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-download"></i>&nbsp;Download Rental Fee Report PDF</button>
+            <button id="downloadButton" type="submit" class="btn btn-primary" onclick="updateFormAndSubmitRental('')"><i class="bi bi-cloud-download"></i>&nbsp;Download Rental Fee Report PDF</button>
+            <button id="sendEmailButton" type="submit" class="btn btn-info" onclick="updateFormAndSubmitRental('sendemail_Rental')"><i class="bi bi-envelope"></i>&nbsp;Send as an Email</button>
         </form>
-        <form class="w-100 d-flex flex-column" style="gap:20px;" method="get" action="{% url 'view_report' id=resident.id %}">
-            <input class="form-control" type="hidden" name="petty" value="render">
-            <div class="form-group">
-                <label >Start Date:</label>
-                <input type="date" class="form-control" name="startdate">
-            </div>
-            <div class="form-group">
-                <label>End Date:</label>
-                <input type="date" class="form-control" name="enddate">
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-download"></i>&nbsp;Download Petty Cash Report PDF</button>
-        </form>
-        <form class="w-100 d-flex flex-column" style="gap:20px;" method="get" action="{% url 'view_report' id=resident.id %}">
-            <input class="form-control" type="hidden" name="year" value="render">
-            <div class="form-group">
-                <label >Start Date:</label>
-                <input type="date" class="form-control" name="startdate">
-            </div>
-            <div class="form-group">
-                <label>End Date:</label>
-                <input type="date" class="form-control" name="enddate">
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-download"></i>&nbsp;Download Yearly Report PDF</button>
-        </form>
+        
+        <script>
+            function updateFormAndSubmitYearly(input_name) {
+                const form = document.getElementById('reportFormYearly');
+                const emailInput = document.createElement('input');
+                emailInput.type = 'hidden';
+                emailInput.name = input_name;
+                emailInput.value = 'call function';
+                form.appendChild(emailInput);
+                form.submit();
+            }
+            function updateFormAndSubmitPetty(input_name) {
+                const form = document.getElementById('reportFormPetty');
+                const emailInput = document.createElement('input');
+                emailInput.type = 'hidden';
+                emailInput.name = input_name;
+                emailInput.value = 'call function petty'+ input_name;
+                form.appendChild(emailInput);
+                form.submit();
+            }
+            function updateFormAndSubmitRental(input_name) {
+                const form = document.getElementById('reportFormRental');
+                const emailInput = document.createElement('input');
+                emailInput.type = 'hidden';
+                emailInput.name = input_name;
+                emailInput.value = 'call function';
+                form.appendChild(emailInput);
+                form.submit();
+            }
+        </script>
+        
         
     </div>
 
