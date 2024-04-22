@@ -74,12 +74,16 @@ WSGI_APPLICATION = 'senior_home_portal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+import pymysql 
+pymysql.version_info = (1, 4, 13, "final", 0)
+pymysql.install_as_MySQLdb()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'senior', 
         'USER': 'root', 
-        'PASSWORD': '',  
+        'PASSWORD': 'Umang@123',  
         'HOST': 'localhost', 
         'PORT': '3306',
     }
