@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yearly Report</title>
+    <title>Rental Report</title>
     <style>
         /* Add your custom CSS styles here */
         body {
@@ -44,8 +44,7 @@
         <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
             <tr>
                 <td style="padding: 40px 0px; text-align: center;">
-                    <h1 class="report-heading" style="font-size: 30px; border-top: 5px solid black; border-bottom: 5px solid black; ">Rental Invoice</h1>
-                    
+                    <h1 class="report-heading" style="font-size: 30px; border-top: 5px solid black; border-bottom: 5px solid black; ">Invoice</h1>
                 </td>
                 <td>
                     <img style="width: 150px;padding: 20px; text-align: right;" src="https://www.lchaimretirement.ca/img/lchaim-leaders-logo.png" alt="Logo">
@@ -55,6 +54,8 @@
             </tr>
         </table>
         <div class="letter-body" style="font-size:18px;">
+            <p style="font-size: 10px; text-align:right; margin-bottom:10px;">Invoice no. {{resident.id}}</p>
+            <h2 style=""><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
             <p style="padding-top:20px;">{{ date }}</p>
             <p>Report <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
                 
@@ -65,7 +66,7 @@
                 <thead class="thead-light">
                     <tr>
                         <th class="maroon">Date</th>
-                        <th class="maroon">Month</th>
+                        <th class="maroon">Description</th>
                         <th class="maroon">Amount</th>
                         <th class="maroon">Status</th>
                     </tr>
@@ -74,7 +75,7 @@
                     {% for fee in rental_fees %}
                     <tr>
                         <td>{{ fee.date }}</td>
-                        <td>{{ fee.month }}</td>
+                        <td>Rent/Care</td>
                         <td>${{ fee.amount }}</td>
                         <td>{% if not fee.paid %}Not Paid{% else %}Paid{% endif %}</td>
                     </tr>

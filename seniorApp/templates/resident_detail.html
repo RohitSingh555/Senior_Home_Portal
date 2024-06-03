@@ -17,39 +17,52 @@
         <div class="col-md-12">
           <div class="row container mx-auto" style="justify-content: center;">
             <div class="row pt-5">
-    <div class="col-md-6">
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resident Information:</h5>
+                <p><i class="bi bi-person-fill"></i> <strong>First Name: </strong> {{ resident.resident_first_name }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Last Name:</strong> {{ resident.resident_last_name }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Room Number:</strong> {{ resident.room_number }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Ohip#:</strong> {{ resident.ohip }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Date of Birth:</strong> {{ resident.date_of_birth }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Admission Date:</strong>{{ resident.admission_date }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Date:</strong>{{ resident.discharge_date }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Info:</strong>{{ resident.reason_for_discharge }}</p>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
         <div class="card ">
             <div class="card-body">
-                <h5 class="card-title">Personal Information</h5>
-                <p><i class="bi bi-person-fill"></i> <strong>ID:</strong> {{ resident.id }}</p>
+                <h5 class="card-title">Contact 1: </h5>
                 <p><i class="bi bi-person-fill"></i> <strong>Contact Name:</strong> {{ resident.contact_name }}</p>
                 <p><i class="bi bi-person-fill"></i> <strong>Relation 1:</strong> {{ resident.relation1 }}</p>
-                <p><i class="bi bi-person-fill"></i> <strong>Contact Name 2:</strong> {{ resident.contact_name2 }}</p>
-                <p><i class="bi bi-person-fill"></i> <strong>Relation 2:</strong> {{ resident.relation2 }}</p>
-                <p><i class="bi bi-credit-card-fill"></i> <strong>Security Deposit:</strong> {{ resident.security_deposit }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Phone Number:</strong> {{ resident.phone_number }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Work Number:</strong> {{ resident.work_number }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Cell Number:</strong> {{ resident.cell_number }}</p>
                 <p><i class="bi bi-envelope-fill"></i> <strong>Email Address:</strong> {{ resident.email_address }}</p>
+                
+
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Medical Information</h5>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Phone Number Contact 2:</strong> {{ resident.phone_number_contact2 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Work Number Contact 2:</strong> {{ resident.work_number_contact2 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Cell Number Contact 2:</strong> {{ resident.cell_number_contact2 }}</p>
-                <p><i class="bi bi-sticky-fill"></i> <strong>Notes:</strong> {{ resident.notes }}</p>
-                <p><i class="bi bi-door-open-fill"></i> <strong>Room Number:</strong> {{ resident.room_number }}</p>
-                <p><i class="bi bi-credit-card-fill"></i> <strong>OHIP:</strong> {{ resident.ohip }}</p>
-                <p><i class="bi bi-calendar3-fill"></i> <strong>Date of Birth:</strong> {{ resident.date_of_birth }}</p>
-                <p><i class="bi bi-x-diamond-fill"></i> <strong>DNR:</strong> {{ resident.dnr }}</p>
-                <p><i class="bi bi-calendar-plus-fill"></i> <strong>Admission Date:</strong> {{ resident.admission_date }}</p>
+                <h5 class="card-title">Contact 2:</h5>
+                <p><i class="bi bi-person-fill"></i> <strong>Contact Name: </strong> {{ resident.contact_name2 }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Relation:</strong> {{ resident.relation2 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Phone Number:</strong> {{ resident.phone_number_contact2 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Cell Number:</strong> {{ resident.cell_number_contact2 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Work Number:</strong> {{ resident.work_number_contact2 }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Email Address: &nbsp;</strong>{{ resident.email_address_contact2 }}</p>
             </div>
         </div>
     </div>
+    
 </div>
 
             
@@ -79,21 +92,22 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Sr No.</th>
-                            <th>Type</th>
-                            <th>Deposit</th>
-                            <th>Withdrawal</th>
                             <th>Date</th>
+                            <th>Type</th>
+                            <th>Payments</th>
+                            <th>Price</th>
+                            <th>Balance</th>
                             <th>Actions</th> <!-- Add a column for actions -->
                         </tr>
                     </thead>
                     <tbody>
                         {% for petty_cash in resident.pettycash_set.all %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
+                            <td>{{ petty_cash.date }}</td>
+
                             <td>
                                 {% if petty_cash.deposit %}
-                                -
+                                Payments
                                 {% else %}
                                 {{ petty_cash.petty_cash_type.type }}
                                 {% endif %}
@@ -107,12 +121,17 @@
                             </td>
                             <td>
                                 {% if petty_cash.withdrawl %}
-                                    {{ petty_cash.withdrawl }} $
+                                   $ {{ petty_cash.withdrawl }} 
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
-                            <td>{{ petty_cash.date }}</td>
+                            <td>
+                                {% if petty_cash.balance %}
+                                {{ petty_cash.balance }} 
+                                {% endif %}
+
+                            </td>
                             <td>
                                 <!-- Button to open edit modal -->
                                 <div class="d-flex ">
@@ -154,19 +173,19 @@
                                                     <label for="id_deposit{{ petty_cash.id }}">Deposit:</label>
                                                     <input type="number" class="form-control" id="deposit{{ petty_cash.id }}" name="deposit" value="{{ petty_cash.deposit }}">
                                                 {% else %}
-                                                    <label for="id_withdrawal{{ petty_cash.id }}">Withdrawal:</label>
-                                                    <input type="number" class="form-control" id="withdrawal{{ petty_cash.id }}" name="withdrawal" value="{{ petty_cash.withdrawl }}">
+                                                    <label for="id_withdrawal{{ petty_cash.id }}">Withdrawl:</label>
+                                                    <input type="number" class="form-control" id="withdrawal{{ petty_cash.id }}" name="withdrawl" value="{{ petty_cash.withdrawl }}">
                                                 {% endif %}
                                             </div>
-                                            <div class="form-group">
-                                                {% if petty_cash.type == 'Withdrawl' %}
+                                            <div class="form-group" type="{% if petty_cash.type != 'Withdrawl' %}hidden{% endif %}">
+                                                
                                                 <label for="petty_cash_type{{ petty_cash.id }}">Petty Cash Type:</label>
                                                 <select class="form-control" id="petty_cash_type{{ petty_cash.id }}" name="petty_cash_type">
                                                     {% for petty_cash_type in petty_cash_types %}
                                                         <option value="{{ petty_cash_type.id }}" {% if petty_cash_type.id == petty_cash.petty_cash_type.id %} selected {% endif %}>{{ petty_cash_type.type }}</option>
                                                     {% endfor %}
                                                 </select>
-                                                {% endif %}
+                                                
                                             </div>
                                             <div class="form-group">
                                                 <label for="date{{ petty_cash.id }}">Date:</label>
@@ -207,22 +226,27 @@
                 <table class="table table-bordered " >
                     <thead>
                         <tr>
-                            <th>Sr No.</th>
-                            <th>Amount</th>
-                            <th>Month</th>
-                            <th>Status</th>
                             <th>Date</th>
+                            <th>Month</th>
+                          
+                            <th>Amount Due</th>
+                            <th>Payment Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for fee in resident.rentalfee_set.all %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ fee.amount }} $</td>
-                            <td>{{ fee.month }}</td>
-                            <td>{{ fee.paid }}</td>
                             <td>{{ fee.date }}</td>
+                            <td>{{ fee.month }}</td>
+                            
+                            <td>{{ fee.amount }} $</td>
+                            <td>{% if fee.paid %}
+                                Paid
+                            {% else %}
+                                Unpaid</td>
+                            {% endif %}
+                       
                             <td>
                                 
                                 <!-- Button to open edit modal -->
@@ -285,6 +309,10 @@
                                                             <option value="Dec">December</option>
                                                           
                                                           </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="id_paid">Paid:</label>
+                                                        <input type="checkbox" name="paid" id="id_paid" checked="{{fee.paid}}">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="id_date{{ fee.id }}">Date:</label>

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-@372k-t^emizuk#zt0#k7d816)omf*-rr^3d@)3tc04kf)_31+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['app.lchaimretirement.ca','127.0.0.1']
+ALLOWED_HOSTS = ['app.lchaimretirement.ca']
 
 
 # Application definition
@@ -78,27 +78,27 @@ import pymysql
 pymysql.version_info = (1, 4, 13, "final", 0)
 pymysql.install_as_MySQLdb()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'senior', 
-        'USER': 'root', 
-        'PASSWORD': 'root',  
-        'HOST': 'localhost', 
-        'PORT': '3306',
-    }
-}
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'lchaimre_seniorportal', 
-#         'USER': 'lchaimre_testuser', 
+#         'NAME': 'senior', 
+#         'USER': 'root', 
 #         'PASSWORD': 'Umang@123',  
-#         'HOST': '199.68.177.41', 
+#         'HOST': 'localhost', 
 #         'PORT': '3306',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lchaimre_seniorportal', 
+        'USER': 'lchaimre_testuser', 
+        'PASSWORD': 'Umang@123',  
+        'HOST': '199.68.177.41', 
+        'PORT': '3306',
+    }
+}
 
 
 # Password validation
@@ -148,11 +148,11 @@ AUTHENTICATION_BACKENDS = [
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'app.lchaimretirement.ca'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "lcahim@app.lchaimretirement.ca"
-EMAIL_HOST_PASSWORD = "Rub2484@"
+EMAIL_HOST_USER = "deborah@lchaimretirement.ca"
+EMAIL_HOST_PASSWORD = "Sarina18"
 
 LOGIN_URL = '/login'
 

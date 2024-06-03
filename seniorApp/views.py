@@ -25,6 +25,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import base64
 from django.core.mail import EmailMessage
+from email.utils import formataddr
 
 def my_login_view(request):
     if request.method == 'POST':
@@ -103,19 +104,29 @@ def resident_detail(request, id):
         print(petty_cash_id)
         if petty_cash_id: 
             petty_cash_instance = get_object_or_404(PettyCash, pk=petty_cash_id)
+            # print(petty_cash_instance.withdrawl)
+            old_withdrawl = petty_cash_instance.withdrawl
+            old_deposit = petty_cash_instance.deposit
+            old_balance = petty_cash_instance.balance
+            old_petty_cash_type = petty_cash_instance.petty_cash_type
             petty_form = PettyCashForm(request.POST, instance=petty_cash_instance)
             if petty_form.is_valid():
+                petty_form = petty_form.save(commit=False)
+                print(petty_form)
                 if petty_cash_instance.type == 'Withdrawl':
-                    change = petty_cash_instance.withdrawl - petty_form.withdrawl
-                    petty_form.balance = petty_cash_instance.balance + change
+                    change = old_withdrawl - petty_form.withdrawl
+                    print('change --> ' + str(change))
+                    petty_form.balance = old_balance + change
                 else: 
-                    change = petty_cash_instance.deposit - petty_form.deposit
-                    petty_form.balance = petty_cash_instance.balance - change
+                    change = old_deposit - petty_form.deposit
+                    petty_form.balance = old_balance - change
+                    # petty_form.petty_cash_type = old_petty_cash_type
 
                 petty_form.save()
                 return redirect('resident_detail', id=id)
         else:  
             petty_form = PettyCashForm(request.POST)
+            # print(petty_form)
             if petty_form.is_valid():
                 petty_cash = petty_form.save(commit=False)
                 petty_cash.resident = resident
@@ -221,20 +232,20 @@ def generate_yearly_pdf(request, id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
-        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-        resident=resident
-    )
+    # petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+    #     Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+    #     resident=resident
+    # )
     
-    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
-    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+    # deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    # withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
 
-    # Calculate the total deposit and withdrawal
-    total_deposit = sum(deposit_amounts)
-    total_withdrawal = sum(withdrawal_amounts)
+    # # Calculate the total deposit and withdrawal
+    # total_deposit = sum(deposit_amounts)
+    # total_withdrawal = sum(withdrawal_amounts)
 
-    balance = total_deposit - total_withdrawal
-    total_amount = sum([fee.amount for fee in rental_fees]) + balance
+    # balance = total_deposit - total_withdrawal
+    total_amount = sum([fee.amount for fee in rental_fees]) 
     twenty_percent = total_amount * decimal.Decimal('0.20')
     sixty_percent = total_amount * decimal.Decimal('0.60')
     twenty_percent_again = total_amount * decimal.Decimal('0.20')
@@ -248,7 +259,7 @@ def generate_yearly_pdf(request, id, startdate,enddate):
         'startdate': startdate_obj,
         'enddate': enddate_obj,
         'rental_fees': rental_fees,
-        'petty_cash_transactions': petty_cash_transactions,
+        # 'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'twenty_percent': twenty_percent,
         'sixty_percent': sixty_percent,
@@ -325,10 +336,20 @@ def generate_pdf_petty(request, id, startdate,enddate):
     total_deposit = sum(deposit_amounts)
     total_withdrawal = sum(withdrawal_amounts)
     balance = total_deposit - total_withdrawal
+    if len(petty_cash_transactions) > 0:
+        balance = petty_cash_transactions.last().balance
+    if balance >= 0:
+        balance = 0
+    else:
+        balance = abs(balance)
+    print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
-        closest_previous_balance= closest_previous_balance.balance-balance
-        print(closest_previous_balance)
+        # closest_previous_balance= closest_previous_balance.balance-balance
+        # print(closest_previous_balance)
+        closest_previous_balance = closest_previous_balance.balance
+
+        
     
     # Render the PDF with the retrieved data
     template = get_template('petty_cash_report.html')
@@ -364,20 +385,20 @@ def sendemail_yearly(request, id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
-        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-        resident=resident
-    )
+    # petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
+    #     Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+    #     resident=resident
+    # )
     
-    deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
-    withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
+    # deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
+    # withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
 
-    # Calculate the total deposit and withdrawal
-    total_deposit = sum(deposit_amounts)
-    total_withdrawal = sum(withdrawal_amounts)
+    # # Calculate the total deposit and withdrawal
+    # total_deposit = sum(deposit_amounts)
+    # total_withdrawal = sum(withdrawal_amounts)
 
-    balance = total_deposit - total_withdrawal
-    total_amount = sum([fee.amount for fee in rental_fees]) + balance
+    # balance = total_deposit - total_withdrawal
+    total_amount = sum([fee.amount for fee in rental_fees]) 
     twenty_percent = total_amount * decimal.Decimal('0.20')
     sixty_percent = total_amount * decimal.Decimal('0.60')
     twenty_percent_again = total_amount * decimal.Decimal('0.20')
@@ -390,7 +411,7 @@ def sendemail_yearly(request, id, startdate,enddate):
         'startdate': startdate_obj,
         'enddate': enddate_obj,
         'rental_fees': rental_fees,
-        'petty_cash_transactions': petty_cash_transactions,
+        # 'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'twenty_percent': twenty_percent,
         'sixty_percent': sixty_percent,
@@ -412,9 +433,17 @@ def sendemail_yearly(request, id, startdate,enddate):
     subject = 'Yearly Report PDF'
     message = 'Please find attached the Yearly Report PDF for your reference.'
     email_from = settings.EMAIL_HOST_USER
-    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
+    
+    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
+    if resident.email_address:
+        recipient_list = [resident.email_address]
+    else: 
+        return HttpResponse('Email Address Not Present in Resident Info')
+    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
+    # deborah@lchaimretirement.ca
+    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
-    email = EmailMessage(subject, message, email_from, recipient_list)
+    # email = EmailMessage(subject, message, email_from, recipient_list)
 
     # Attach the PDF to the email
     email.attach(f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
@@ -440,14 +469,25 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
     deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
     withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-    
+    # all_paid = all(fee.paid for fee in rental_fees)
     # Calculate the total deposit and withdrawal
     total_deposit = sum(deposit_amounts)
     total_withdrawal = sum(withdrawal_amounts)
     balance = total_deposit - total_withdrawal
+    if len(petty_cash_transactions) > 0:
+        balance = petty_cash_transactions.last().balance
+    if balance >= 0:
+        balance = 0
+    else:
+        balance = abs(balance)
+    print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
-        closest_previous_balance = closest_previous_balance.balance - balance
+        # closest_previous_balance= closest_previous_balance.balance-balance
+        # print(closest_previous_balance)
+        closest_previous_balance = closest_previous_balance.balance
+
+        
     
     # Render the PDF with the retrieved data
     template = get_template('petty_cash_report.html')
@@ -460,6 +500,7 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
         'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'balance': balance,
+        # 'all_paid': all_paid,
         'closest_previous_balance': closest_previous_balance,
     }
     html = template.render(context)
@@ -478,9 +519,17 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     subject = 'Petty Cash Report'
     message = 'Please find attached the petty cash report for your reference.'
     email_from = settings.EMAIL_HOST_USER
-    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
+    # recipient_list = ['umangd98@gmail.com']  # Replace with recipient email address
 
-    email = EmailMessage(subject, message, email_from, recipient_list)
+    # email = EmailMessage(subject, message, email_from, recipient_list)
+    
+    if resident.email_address:
+        recipient_list = [resident.email_address]
+    else: 
+        return HttpResponse('Email Address Not Present in Resident Info')
+    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
+    # deborah@lchaimretirement.ca
+    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
     # Attach the PDF to the email
     email.attach(f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
@@ -530,10 +579,18 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
     # Create the EmailMessage object
     subject = 'Rental fee Report'
     message = 'Please find attached the Rental fee Report for your reference.'
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
+    email_from = formataddr(("L'chaim Retirement Home", settings.EMAIL_HOST_USER))
+    # recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
 
-    email = EmailMessage(subject, message, email_from, recipient_list)
+    # email = EmailMessage(subject, message, email_from, recipient_list)
+    
+    if resident.email_address:
+        recipient_list = [resident.email_address]
+    else: 
+        return HttpResponse('Email Address Not Present in Resident Info')
+    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
+    # deborah@lchaimretirement.ca
+    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
     # Attach the PDF to the email
     email.attach(f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
