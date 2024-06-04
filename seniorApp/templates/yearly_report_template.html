@@ -19,6 +19,7 @@
             font-weight: medium;
             padding:0px;
             margin:0px;
+            padding:0px 100px;
         }
         .container {
             margin: 0 auto;
@@ -54,24 +55,24 @@
                     </td>
                     <td>
                         <img style="width: 150px;padding: 20px; text-align: right;" src="https://i.pinimg.com/736x/da/33/fb/da33fbbf61a9463e127ada2f63b233e4.jpg" alt="Logo">
-                        <p class="headertext" style="margin: 0; text-align: right; font-size:15px;">718
-                            Sheppard Avenue West&nbsp;&nbsp;Toronto&nbsp;&nbsp;ON&nbsp;&nbsp;M3H 2S6</p>
-                        <p style="margin: 0;text-align: right;padding:0px 10px;font-size:15px;">Phone: 416-398-7898 Fax:
-                            416-398-3909</p>
-                        <p style="margin: 0;text-align: right;padding:0px 10px;font-size:15px;">LchaimRetirement.ca</p>
+                        <div class="headertext" style="margin: 0; text-align: right; font-size:15px;">718
+                            Sheppard Avenue West&nbsp;&nbsp;Toronto&nbsp;&nbsp;ON&nbsp;&nbsp;M3H 2S6</div>
+                        <div style="margin: 0;text-align: right;padding:0px 10px;font-size:15px;">Phone: 416-398-7898 Fax:
+                            416-398-3909</div>
+                        <div style="margin: 0;text-align: right;padding:0px 10px;font-size:15px;">LchaimRetirement.ca</div>
                     </td>
                 </tr>
             </table>
             
 
-            <div class="report_content" style="font-size:18px;">
+            <div class="report_content" style="font-size:18px; ">
 
             <p style="padding-top:20px;">{{ date }}</p>
             <br>
             <p >To Whom it may concern,</p>
-            <h2 style="font-size: 25px;"><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
+            <h2 style="font-size: 25px;padding:0px 100px;"><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
             <p>Has paid the total of: </p>
-            <span class="text-dark font-weight-bold " style="font-size: 25px; font-weight:bold;">$&nbsp;{{ total_amount|floatformat:"2" }}</span>
+            <p class="text-dark font-weight-bold " style="font-size: 25px; font-weight:bold; ">$&nbsp;{{ total_amount|floatformat:"2" }}</p>
             <p>to L’chaim Retirement Home for the period spanning <span> {{ startdate }} To {{ enddate }}.<span>  The breakdown of this amount is as follows:</p>
                 <br>
             <p style=" font-weight:medium;">Rent: $&nbsp;{{twenty_percent}}</p>
