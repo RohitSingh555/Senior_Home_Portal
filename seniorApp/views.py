@@ -1,6 +1,6 @@
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Residents, RentalFee, PettyCash,PettyCashType
+from .models import Residents, RentalFee, PettyCash,PettyCashType,EmailLogs
 from .forms import RentalFeeForm, PettyCashForm, ResidentForm
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -385,19 +385,6 @@ def sendemail_yearly(request, id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    # petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
-    #     Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-    #     resident=resident
-    # )
-    
-    # deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
-    # withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-
-    # # Calculate the total deposit and withdrawal
-    # total_deposit = sum(deposit_amounts)
-    # total_withdrawal = sum(withdrawal_amounts)
-
-    # balance = total_deposit - total_withdrawal
     total_amount = sum([fee.amount for fee in rental_fees]) 
     twenty_percent = total_amount * decimal.Decimal('0.20')
     sixty_percent = total_amount * decimal.Decimal('0.60')
@@ -431,7 +418,7 @@ def sendemail_yearly(request, id, startdate,enddate):
     
     # Create the EmailMessage object
     subject = 'Yearly Report PDF'
-    message = 'Please find attached the Yearly Report PDF for your reference.'
+    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Yearly Report PDF for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
     email_from = settings.EMAIL_HOST_USER
     
     # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
@@ -441,7 +428,7 @@ def sendemail_yearly(request, id, startdate,enddate):
         return HttpResponse('Email Address Not Present in Resident Info')
     # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
     # deborah@lchaimretirement.ca
-    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
+    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
     # email = EmailMessage(subject, message, email_from, recipient_list)
 
@@ -450,6 +437,14 @@ def sendemail_yearly(request, id, startdate,enddate):
 
     # Send the email
     email.send()
+    # Save the email log
+    email_log = EmailLogs()
+    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
+    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    email_log.email_body = context
+    email_log.resident = resident
+    email_log.date = date
+    email_log.save()
 
     return HttpResponse('Email sent successfully.')
 
@@ -517,7 +512,7 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     
     # Create the EmailMessage object
     subject = 'Petty Cash Report'
-    message = 'Please find attached the petty cash report for your reference.'
+    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the petty cash report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca..'
     email_from = settings.EMAIL_HOST_USER
     # recipient_list = ['umangd98@gmail.com']  # Replace with recipient email address
 
@@ -529,13 +524,21 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
         return HttpResponse('Email Address Not Present in Resident Info')
     # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
     # deborah@lchaimretirement.ca
-    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
+    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
     # Attach the PDF to the email
     email.attach(f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
 
     # Send the email
     email.send()
+    # Save the email log
+    email_log = EmailLogs()
+    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
+    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    email_log.email_body = context
+    email_log.resident = resident
+    email_log.date = date
+    email_log.save()
 
     return HttpResponse('Email sent successfully.')
 def sendemail_pdf_rental(request, id, startdate,enddate):
@@ -578,7 +581,7 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
     
     # Create the EmailMessage object
     subject = 'Rental fee Report'
-    message = 'Please find attached the Rental fee Report for your reference.'
+    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Rental fee Report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
     email_from = formataddr(("L'chaim Retirement Home", settings.EMAIL_HOST_USER))
     # recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
 
@@ -590,13 +593,21 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
         return HttpResponse('Email Address Not Present in Resident Info')
     # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
     # deborah@lchaimretirement.ca
-    email = EmailMessage(subject, message, email_from, recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
+    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
     # Attach the PDF to the email
     email.attach(f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
 
     # Send the email
     email.send()
+    # Save the email log
+    email_log = EmailLogs()
+    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
+    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
+    email_log.email_body = context
+    email_log.resident = resident
+    email_log.date = date
+    email_log.save()
 
     return HttpResponse('Email sent successfully.')
 

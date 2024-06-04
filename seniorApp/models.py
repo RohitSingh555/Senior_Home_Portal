@@ -86,3 +86,13 @@ class PettyCashType(models.Model):
 
     def __str__(self):
         return self.type
+    
+
+class EmailLogs(models.Model):
+    resident_name = models.CharField(max_length=100,blank=True, null=True)
+    emailed_report_name = models.CharField(max_length=100,blank=True, null=True)
+    email_body = models.TextField()
+    resident = models.ForeignKey(Residents, on_delete=models.CASCADE)
+    date = models.DateField()
+    def __str__(self):
+        return self.resident.resident_first_name 

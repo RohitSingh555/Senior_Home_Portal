@@ -5,6 +5,7 @@ admin.site.register(Residents)
 admin.site.register(RentalFee)
 admin.site.register(PettyCash)
 admin.site.register(PettyCashType)
+admin.site.register(EmailLogs)
 
 
 
