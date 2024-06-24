@@ -400,29 +400,61 @@ def sendemail_yearly(request, id, startdate, enddate):
 
         pdf_content.seek(0)
         subject = 'Yearly Report PDF'
-        message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Yearly Report PDF for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
+        message = f"""
+        <html>
+        <body>
+            <p>Dear {resident.resident_first_name},</p>
+
+            <p>I hope you're doing well. Attached is the Yearly Report PDF for services provided at L'chaim Retirement Home. Kindly send an e-transfer to payments@lchaimretirement.ca.</p>
+
+            <p>Warmest Regards,</p><br>
+
+            <p style="font-size: 14px; color: #808080;">
+                <h3 style="color: #808080;">L'chaim Retirement Home</h3>
+                <h3>Deborah Rothenberg - Director of Operations</h3>
+                <p>P. 416-398-7898 Ext. 222</p>
+                <p>E. deborah@lchaimretirement.ca</p>
+                <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
+            </p>
+        </body>
+        </html>
+        """
+
         email_from = settings.EMAIL_HOST_USER
 
         if not resident.email_address:
-            logger.warning('Email Address Not Present in Resident Info for resident id %s', id)
+            logger.warning('Email Address Not Present in Resident Info for resident id %s', resident.id)
             return HttpResponse('Email Address Not Present in Resident Info')
 
         recipient_list = [resident.email_address]
-        email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to=['deborah@lchaimretirement.ca'])
-        email.attach(f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+        email = EmailMessage(
+            subject,
+            message,
+            from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>',
+            to=recipient_list,
+            reply_to=['deborah@lchaimretirement.ca']
+        )
+        email.content_subtype = "html"  # Set the content subtype to HTML
+
+        email.attach(
+            f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+            pdf_content.getvalue(),
+            'application/pdf'
+        )
 
         email.send()
-        
+
         email_log = EmailLogs(
             resident_name=f"{resident.resident_first_name} {resident.resident_last_name}",
             emailed_report_name=f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
-            email_body=context,
+            email_body=message,
             resident=resident,
             date=date
         )
         email_log.save()
 
-        return HttpResponse('Email sent successfully.')
+        resident_name=f"{resident.resident_first_name} {resident.resident_last_name}"
+        return render(request, 'email_sent_success.html', {'resident_name': resident_name})
 
     except Exception as e:
         logger.error('Error in sending yearly email: %s', str(e), exc_info=True)
@@ -481,27 +513,60 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     pdf_content.seek(0)
     
     subject = 'Petty Cash Report'
-    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the petty cash report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca..'
+    message = f"""
+        <html>
+        <body>
+            <p>Dear {resident.resident_first_name},</p>
+
+            <p>I hope you're doing well. Attached is the Yearly Report PDF for services provided at L'chaim Retirement Home. Kindly send an e-transfer to payments@lchaimretirement.ca.</p>
+
+            <p>Warmest Regards,</p><br>
+
+            <p style="font-size: 14px; color: #808080;">
+                <h3 style="color: #808080;">L'chaim Retirement Home</h3>
+                <h3>Deborah Rothenberg - Director of Operations</h3>
+                <p>P. 416-398-7898 Ext. 222</p>
+                <p>E. deborah@lchaimretirement.ca</p>
+                <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
+            </p>
+        </body>
+        </html>
+        """
     email_from = settings.EMAIL_HOST_USER
-    
+
     if resident.email_address:
         recipient_list = [resident.email_address]
     else: 
+        logger.warning('Email Address Not Present in Resident Info for resident id %s', resident.id)
         return HttpResponse('Email Address Not Present in Resident Info')
-    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
-    email.attach(f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+    email = EmailMessage(
+        subject,
+        message,
+        from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>',
+        to=recipient_list,
+        reply_to=['deborah@lchaimretirement.ca']
+    )
+    email.content_subtype = "html"  # Set the content subtype to HTML
+
+    email.attach(
+        f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+        pdf_content.getvalue(),
+        'application/pdf'
+    )
 
     email.send()
-    email_log = EmailLogs()
-    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
-    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    email_log.email_body = context
-    email_log.resident = resident
-    email_log.date = date
+    
+    email_log = EmailLogs(
+        resident_name=f"{resident.resident_first_name} {resident.resident_last_name}",
+        emailed_report_name=f'Petty Cash Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+        email_body=message,
+        resident=resident,
+        date=date
+    )
     email_log.save()
-
-    return HttpResponse('Email sent successfully.')
+    resident_name=f"{resident.resident_first_name} {resident.resident_last_name}"
+    return render(request, 'email_sent_success.html', {'resident_name': resident_name})
 
 def sendemail_pdf_rental(request, id, startdate,enddate):
     date = datetime.today().date()
@@ -541,27 +606,63 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
     pdf_content.seek(0)
     
     subject = 'Rental fee Report'
-    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Rental fee Report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
+    message = f"""
+        <html>
+        <body>
+            <p>Dear {resident.resident_first_name},</p>
+
+            <p>I hope you're doing well. Attached is the Yearly Report PDF for services provided at L'chaim Retirement Home. Kindly send an e-transfer to payments@lchaimretirement.ca.</p>
+
+            <p>Warmest Regards,</p><br>
+
+            <p style="font-size: 14px; color: #808080;">
+                <h3 style="color: #808080;">L'chaim Retirement Home</h3>
+                <h3>Deborah Rothenberg - Director of Operations</h3>
+                <p>P. 416-398-7898 Ext. 222</p>
+                <p>E. deborah@lchaimretirement.ca</p>
+                <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
+            </p>
+        </body>
+        </html>
+        """
+
     email_from = formataddr(("L'chaim Retirement Home", settings.EMAIL_HOST_USER))
-    
+
     if resident.email_address:
         recipient_list = [resident.email_address]
-    else: 
+    else:
+        logger.warning('Email Address Not Present in Resident Info for resident id %s', resident.id)
         return HttpResponse('Email Address Not Present in Resident Info')
-    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
-    email.attach(f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+    email = EmailMessage(
+        subject,
+        message,
+        from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>',
+        to=recipient_list,
+        reply_to=['deborah@lchaimretirement.ca']
+    )
+    email.content_subtype = "html"  # Set the content subtype to HTML
+
+    email.attach(
+        f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+        pdf_content.getvalue(),
+        'application/pdf'
+    )
 
     email.send()
-    email_log = EmailLogs()
-    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
-    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    email_log.email_body = context
-    email_log.resident = resident
-    email_log.date = date
+
+    email_log = EmailLogs(
+        resident_name=f"{resident.resident_first_name} {resident.resident_last_name}",
+        emailed_report_name=f'Rental Fee Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+        email_body=message,
+        resident=resident,
+        date=date
+    )
     email_log.save()
 
-    return HttpResponse('Email sent successfully.')
+    resident_name=f"{resident.resident_first_name} {resident.resident_last_name}"
+    return render(request, 'email_sent_success.html', {'resident_name': resident_name})
+
 
 def view_my_report(request):
     return render(request, 'petty_cash_report.html')

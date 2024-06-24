@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sent Successfully</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 30vh;
+            color: #1f253d;
+        }
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 30px; 
+            margin-bottom: 20px;
+            color: #0066b2; 
+        }
+        p {
+            font-size: 16px; 
+        }
+    </style>
+</head>
+<body>
+    <img src="{% static 'sent-mail.gif' %}" alt="Mail Logo" class="logo">
+    <div class="message">
+        Your Email was sent successfully to {{ resident_name }}.
+    </div>
+    <p>You will be redirected back to the previous page shortly.</p>
+
+    <script>
+        setTimeout(function() {
+            history.back();
+        }, 3000); 
+    </script>
+</body>
+</html>

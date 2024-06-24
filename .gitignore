@@ -8,7 +8,7 @@ media
 
 # Backup files # 
 *.bak 
-
+__pycache__
 # If you are using PyCharm # 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -16,7 +16,7 @@ media
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+0001_initial.py
 # AWS User-specific
 .idea/**/aws.xml
 
@@ -137,4 +137,6 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 senior_home_portal/settings.py
+seniorApp/migrations/0001_initial.py
+seniorApp/migrations/0001_initial.py
 seniorApp/migrations/0001_initial.py
