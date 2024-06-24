@@ -1,4 +1,5 @@
 import datetime
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Residents, RentalFee, PettyCash,PettyCashType,EmailLogs
 from .forms import RentalFeeForm, PettyCashForm, ResidentForm
@@ -26,6 +27,10 @@ from django.conf import settings
 import base64
 from django.core.mail import EmailMessage
 from email.utils import formataddr
+import logging
+from django.urls import reverse
+
+logger = logging.getLogger(__name__)
 
 def my_login_view(request):
     if request.method == 'POST':
@@ -34,16 +39,26 @@ def my_login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('/')  # Redirect to the home page after login
+            return redirect('/')  
         else:
-            # Return an error message or handle invalid login
             return render(request, 'login.html', {'error_message': 'Invalid username or password'})
     else:
-        return render(request, 'login.html')  # Render the login page
+        return render(request, 'login.html')  
+    
+from django.contrib.staticfiles import finders
+
+def fetch_resources(uri, rel):
+    if uri.startswith('/static/'):
+        path = finders.find(uri[1:])  # Strip leading slash
+        if path:
+            print(f"Resolved path: {path}")
+            return path
+    print(f"Unresolved URI: {uri}")
+    return uri
 
 def my_logout_view(request):
     logout(request)
-    return redirect('login')  # Redirect to the login page after logout
+    return redirect('login')  
 
 def residents_list(request):
     residents = Residents.objects.all()
@@ -51,7 +66,6 @@ def residents_list(request):
     
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number or 1)
-    # print(page_obj[0].id)
 
     return render(request, 'residents_list.html', {'page_obj': page_obj})
 
@@ -85,13 +99,13 @@ def resident_detail(request, id):
 
     if request.method == 'POST':
         rental_fee_id = request.POST.get('rental_fee_id')
-        if rental_fee_id:  # If rental_fee_id exists, it's an edit operation
+        if rental_fee_id: 
             rental_fee_instance = get_object_or_404(RentalFee, pk=rental_fee_id)
             form = RentalFeeForm(request.POST, instance=rental_fee_instance)
             if form.is_valid():
                 form.save()
                 return redirect('resident_detail', id=id)
-        else:  # Otherwise, it's a create operation
+        else: 
             form = RentalFeeForm(request.POST)
             if form.is_valid():
                 rental_fee = form.save(commit=False)
@@ -99,12 +113,10 @@ def resident_detail(request, id):
                 rental_fee.save()
                 return redirect('resident_detail', id=id)
 
-        # Handle PettyCash form
         petty_cash_id = request.POST.get('petty_cash_id')
         print(petty_cash_id)
         if petty_cash_id: 
             petty_cash_instance = get_object_or_404(PettyCash, pk=petty_cash_id)
-            # print(petty_cash_instance.withdrawl)
             old_withdrawl = petty_cash_instance.withdrawl
             old_deposit = petty_cash_instance.deposit
             old_balance = petty_cash_instance.balance
@@ -120,13 +132,11 @@ def resident_detail(request, id):
                 else: 
                     change = old_deposit - petty_form.deposit
                     petty_form.balance = old_balance - change
-                    # petty_form.petty_cash_type = old_petty_cash_type
 
                 petty_form.save()
                 return redirect('resident_detail', id=id)
         else:  
             petty_form = PettyCashForm(request.POST)
-            # print(petty_form)
             if petty_form.is_valid():
                 petty_cash = petty_form.save(commit=False)
                 petty_cash.resident = resident
@@ -143,7 +153,6 @@ def resident_detail(request, id):
                 petty_cash.save()
                 return redirect('resident_detail', id=id)
         
-        # Handle rental fee deletion
         fee_id = request.POST.get('delete_rental_fee_id')
         if fee_id:
             fee = get_object_or_404(RentalFee, pk=fee_id)
@@ -175,6 +184,9 @@ def add_resident(request):
         form = ResidentForm()
     return render(request, 'add_resident.html', {'form': form})
 
+def email_logs(request):
+    return redirect('/admin/seniorApp/emaillogs/')
+
 def edit_resident(request, id):
     resident = get_object_or_404(Residents, id=id)
     if request.method == 'POST':
@@ -185,8 +197,6 @@ def edit_resident(request, id):
     else:
         form = ResidentForm(instance=resident)
     return render(request, 'edit_resident.html', {'form': form})
-
-from django.urls import reverse
 
 def generate_report(request, id):
     startdate_str = request.GET.get('startdate')
@@ -232,26 +242,10 @@ def generate_yearly_pdf(request, id, startdate,enddate):
         Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
         resident=resident
     )
-    # petty_cash_transactions = PettyCash.objects.annotate(month=ExtractMonth('date')).filter(
-    #     Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-    #     resident=resident
-    # )
-    
-    # deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
-    # withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-
-    # # Calculate the total deposit and withdrawal
-    # total_deposit = sum(deposit_amounts)
-    # total_withdrawal = sum(withdrawal_amounts)
-
-    # balance = total_deposit - total_withdrawal
     total_amount = sum([fee.amount for fee in rental_fees]) 
     twenty_percent = total_amount * decimal.Decimal('0.20')
     sixty_percent = total_amount * decimal.Decimal('0.60')
     twenty_percent_again = total_amount * decimal.Decimal('0.20')
-    # all_paid = all(fee.paid for fee in rental_fees)
-
-    # Render the PDF with the retrieved data
     template = get_template('yearly_report_template.html')
     context = {
         'resident': resident,
@@ -259,19 +253,16 @@ def generate_yearly_pdf(request, id, startdate,enddate):
         'startdate': startdate_obj,
         'enddate': enddate_obj,
         'rental_fees': rental_fees,
-        # 'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'twenty_percent': twenty_percent,
         'sixty_percent': sixty_percent,
         'twenty_percent_again': twenty_percent_again,
-        # 'all_paid': all_paid,
     }
     html = template.render(context)
 
-    # Generate PDF using xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename=Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8', link_callback=fetch_resources)
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
@@ -292,7 +283,6 @@ def generate_pdf(request, id, startdate,enddate):
     )
     total_amount = total_amount = sum([fee.amount for fee in rental_fees])
     all_paid = all(fee.paid for fee in rental_fees)
-    # Render the PDF with the retrieved data
     template = get_template('rental_report.html')
     context = {
         'resident': resident,
@@ -309,7 +299,7 @@ def generate_pdf(request, id, startdate,enddate):
     # Generate PDF using xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename=Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8', link_callback=fetch_resources)
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
@@ -331,8 +321,6 @@ def generate_pdf_petty(request, id, startdate,enddate):
     total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
     deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
     withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-    # all_paid = all(fee.paid for fee in rental_fees)
-    # Calculate the total deposit and withdrawal
     total_deposit = sum(deposit_amounts)
     total_withdrawal = sum(withdrawal_amounts)
     balance = total_deposit - total_withdrawal
@@ -345,8 +333,6 @@ def generate_pdf_petty(request, id, startdate,enddate):
     print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
-        # closest_previous_balance= closest_previous_balance.balance-balance
-        # print(closest_previous_balance)
         closest_previous_balance = closest_previous_balance.balance
 
         
@@ -362,91 +348,85 @@ def generate_pdf_petty(request, id, startdate,enddate):
         'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'balance': balance,
-        # 'all_paid': all_paid,
         'closest_previous_balance': closest_previous_balance,
     }
     html = template.render(context)
 
-    # Generate PDF using xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename=Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8')
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8', link_callback=fetch_resources)
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def sendemail_yearly(request, id, startdate,enddate):
-    date = datetime.today().date()
-    startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
-    enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
-    resident = get_object_or_404(Residents, id=id)
-    rental_fees = RentalFee.objects.filter(
-        Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
-        resident=resident
-    )
-    total_amount = sum([fee.amount for fee in rental_fees]) 
-    twenty_percent = total_amount * decimal.Decimal('0.20')
-    sixty_percent = total_amount * decimal.Decimal('0.60')
-    twenty_percent_again = total_amount * decimal.Decimal('0.20')
+def sendemail_yearly(request, id, startdate, enddate):
+    try:
+        date = datetime.today().date()
+        startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
+        enddate_obj = datetime.strptime(enddate, '%Y-%m-%d').date()
+        resident = get_object_or_404(Residents, id=id)
 
-    # Render the PDF with the retrieved data
-    template = get_template('yearly_report_template.html')
-    context = {
-        'resident': resident,
-        'date': date,
-        'startdate': startdate_obj,
-        'enddate': enddate_obj,
-        'rental_fees': rental_fees,
-        # 'petty_cash_transactions': petty_cash_transactions,
-        'total_amount': total_amount,
-        'twenty_percent': twenty_percent,
-        'sixty_percent': sixty_percent,
-        'twenty_percent_again': twenty_percent_again,
-    }
-    html = template.render(context)
+        rental_fees = RentalFee.objects.filter(
+            Q(date__gte=startdate_obj) & Q(date__lte=enddate_obj),
+            resident=resident
+        )
 
-    # Generate PDF using xhtml2pdf
-    pdf_content = BytesIO()
-    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
+        total_amount = sum([fee.amount for fee in rental_fees]) 
+        twenty_percent = total_amount * decimal.Decimal('0.20')
+        sixty_percent = total_amount * decimal.Decimal('0.60')
+        twenty_percent_again = total_amount * decimal.Decimal('0.20')
 
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        template = get_template('yearly_report_template.html')
+        context = {
+            'resident': resident,
+            'date': date,
+            'startdate': startdate_obj,
+            'enddate': enddate_obj,
+            'rental_fees': rental_fees,
+            'total_amount': total_amount,
+            'twenty_percent': twenty_percent,
+            'sixty_percent': sixty_percent,
+            'twenty_percent_again': twenty_percent_again,
+        }
+        html = template.render(context)
 
-    pdf_content.seek(0)
-    # pdf_content = base64.b64encode(pdf_content).decode()
-    
-    # Create the EmailMessage object
-    subject = 'Yearly Report PDF'
-    message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Yearly Report PDF for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
-    email_from = settings.EMAIL_HOST_USER
-    
-    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
-    if resident.email_address:
+        pdf_content = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8', link_callback=fetch_resources)
+
+        if pisa_status.err:
+            logger.error('Error rendering PDF: %s', html)
+            return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
+        pdf_content.seek(0)
+        subject = 'Yearly Report PDF'
+        message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Yearly Report PDF for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
+        email_from = settings.EMAIL_HOST_USER
+
+        if not resident.email_address:
+            logger.warning('Email Address Not Present in Resident Info for resident id %s', id)
+            return HttpResponse('Email Address Not Present in Resident Info')
+
         recipient_list = [resident.email_address]
-    else: 
-        return HttpResponse('Email Address Not Present in Resident Info')
-    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
-    # deborah@lchaimretirement.ca
-    email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
+        email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to=['deborah@lchaimretirement.ca'])
+        email.attach(f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
 
-    # email = EmailMessage(subject, message, email_from, recipient_list)
+        email.send()
+        
+        email_log = EmailLogs(
+            resident_name=f"{resident.resident_first_name} {resident.resident_last_name}",
+            emailed_report_name=f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf',
+            email_body=context,
+            resident=resident,
+            date=date
+        )
+        email_log.save()
 
-    # Attach the PDF to the email
-    email.attach(f'Yearly_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
+        return HttpResponse('Email sent successfully.')
 
-    # Send the email
-    email.send()
-    # Save the email log
-    email_log = EmailLogs()
-    email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
-    email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
-    email_log.email_body = context
-    email_log.resident = resident
-    email_log.date = date
-    email_log.save()
-
-    return HttpResponse('Email sent successfully.')
+    except Exception as e:
+        logger.error('Error in sending yearly email: %s', str(e), exc_info=True)
+        return HttpResponse('An error occurred while sending the email. Please try again later.', status=500)
 
 def sendemail_pdf_petty(request, id, startdate,enddate):
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
@@ -464,8 +444,6 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     total_amount = sum([fee.amount for fee in rental_fees]) + sum([transaction.deposit for transaction in petty_cash_transactions])
     deposit_amounts = [transaction.deposit for transaction in petty_cash_transactions if transaction.deposit is not None]
     withdrawal_amounts = [transaction.withdrawl for transaction in petty_cash_transactions if transaction.withdrawl is not None]
-    # all_paid = all(fee.paid for fee in rental_fees)
-    # Calculate the total deposit and withdrawal
     total_deposit = sum(deposit_amounts)
     total_withdrawal = sum(withdrawal_amounts)
     balance = total_deposit - total_withdrawal
@@ -478,13 +456,8 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
-        # closest_previous_balance= closest_previous_balance.balance-balance
-        # print(closest_previous_balance)
         closest_previous_balance = closest_previous_balance.balance
 
-        
-    
-    # Render the PDF with the retrieved data
     template = get_template('petty_cash_report.html')
     context = {
         'resident': resident,
@@ -495,43 +468,31 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
         'petty_cash_transactions': petty_cash_transactions,
         'total_amount': total_amount,
         'balance': balance,
-        # 'all_paid': all_paid,
         'closest_previous_balance': closest_previous_balance,
     }
     html = template.render(context)
 
-    # Generate PDF using xhtml2pdf
     pdf_content = BytesIO()
-    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
+    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8', link_callback=fetch_resources)
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
 
     pdf_content.seek(0)
-    # pdf_content = base64.b64encode(pdf_content).decode()
     
-    # Create the EmailMessage object
     subject = 'Petty Cash Report'
     message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the petty cash report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca..'
     email_from = settings.EMAIL_HOST_USER
-    # recipient_list = ['umangd98@gmail.com']  # Replace with recipient email address
-
-    # email = EmailMessage(subject, message, email_from, recipient_list)
     
     if resident.email_address:
         recipient_list = [resident.email_address]
     else: 
         return HttpResponse('Email Address Not Present in Resident Info')
-    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
-    # deborah@lchaimretirement.ca
     email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
-    # Attach the PDF to the email
     email.attach(f'Petty_Cash_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
 
-    # Send the email
     email.send()
-    # Save the email log
     email_log = EmailLogs()
     email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
     email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'
@@ -541,6 +502,7 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     email_log.save()
 
     return HttpResponse('Email sent successfully.')
+
 def sendemail_pdf_rental(request, id, startdate,enddate):
     date = datetime.today().date()
     startdate_obj = datetime.strptime(startdate, '%Y-%m-%d').date()
@@ -571,36 +533,26 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
 
     # Generate PDF using xhtml2pdf
     pdf_content = BytesIO()
-    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8')
+    pisa_status = pisa.CreatePDF(html, dest=pdf_content, encoding='utf-8', link_callback=fetch_resources)
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
 
     pdf_content.seek(0)
-    # pdf_content = base64.b64encode(pdf_content).decode()
     
-    # Create the EmailMessage object
     subject = 'Rental fee Report'
     message = f'Dear {resident.resident_first_name}, I hope you\'re doing well. Attached is the Rental fee Report for services provided at L\'chaim Retirement Home. Kindly send an e-transfer to judy@lchaimretirement.ca.'
     email_from = formataddr(("L'chaim Retirement Home", settings.EMAIL_HOST_USER))
-    # recipient_list = ['rohitsingh@dhaninfo.biz']  # Replace with recipient email address
-
-    # email = EmailMessage(subject, message, email_from, recipient_list)
     
     if resident.email_address:
         recipient_list = [resident.email_address]
     else: 
         return HttpResponse('Email Address Not Present in Resident Info')
-    # recipient_list = ['info@theagilemorph.com']  # Replace with recipient email address
-    # deborah@lchaimretirement.ca
     email = EmailMessage(subject, message, from_email='L\'chaim Retirement Homes <lcahim@app.lchaimretirement.ca>', to=recipient_list, reply_to= ['deborah@lchaimretirement.ca'])
 
-    # Attach the PDF to the email
     email.attach(f'Rental_Fee_Report_{startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf', pdf_content.getvalue(), 'application/pdf')
 
-    # Send the email
     email.send()
-    # Save the email log
     email_log = EmailLogs()
     email_log.resident_name = resident.resident_first_name+" "+resident.resident_last_name
     email_log.emailed_report_name = f'Yearly Report {startdate_obj.strftime("%Y-%m-%d")}_to_{enddate_obj.strftime("%Y-%m-%d")}.pdf'

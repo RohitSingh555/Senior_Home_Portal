@@ -1,71 +1,102 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rental Report</title>
     <style>
-        /* Add your custom CSS styles here */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+        @font-face {
+            font-family: 'CenturyGothic';
+            src: url('/static/fonts/CenturyGothicBold.otf') format('opentype');
         }
+
+        @font-face {
+            font-family: 'gilroy';
+            src: url("/fonts/gilroy.ttf") format('truetype');
+        }
+
+        body {
+            margin: 20px;
+            font-family: 'CenturyGothic';
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
         }
+
         .resident-details {
             margin-bottom: 20px;
         }
-        .transaction-table th, .transaction-table td {
+
+        .transaction-table th,
+        .transaction-table td {
             border: 1px solid #dee2e6;
             padding: 3px;
             text-align: left;
         }
+
         .transaction-table th {
             background-color: #f8f9fa;
         }
+
         .report-heading {
             text-align: center;
             margin-bottom: 30px;
+            font-size: 28pt;
+            font-weight: 300;
+            font-family: 'CenturyGothic', sans-serif;
         }
+
         .letter-body {
             margin-top: 30px;
         }
+
         .maroon {
             color: maroon;
             font-weight: bold;
         }
+
         @page {
             size: a4;
         }
+
+        p.rtl {
+            direction: rtl;
+            font-family: 'CenturyGothic', sans-serif;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <table class="heading_section" style="color: white; background-color: #181818; width: 100%;">
             <tr>
                 <td style="padding: 40px 0px; text-align: center;">
-                    <h1 class="report-heading" style="font-size: 30px; border-top: 5px solid black; border-bottom: 5px solid black; ">Invoice</h1>
+                    <h1 class="report-heading">Invoice</h1>
                 </td>
                 <td>
-                    <img style="width: 150px;padding: 20px; text-align: right;" src="https://www.lchaimretirement.ca/img/lchaim-leaders-logo.png" alt="Logo">
-                    <p class="headertext" style="margin: 0; padding-top: 20px;text-align: right;">718 Sheppard Avenue West Toronto, Ontario M3H 2S6</p>
+                    <img style="width: 150px;padding: 20px; text-align: right;"
+                        src="https://i.pinimg.com/736x/82/07/7c/82077c3b7883c1ef8496dc5a69841fa4.jpg" alt="Logo">
+                    <p class="headertext" style="margin: 0; padding-top: 20px;text-align: right;">718 Sheppard Avenue
+                        West Toronto, Ontario M3H 2S6</p>
                     <p style="margin: 0;text-align: right;">Phone: 416-398-7898 Fax: 416-398-3909</p>
                 </td>
             </tr>
         </table>
         <div class="letter-body" style="font-size:18px;">
-            <p style="font-size: 10px; text-align:right; margin-bottom:10px;">Invoice no. {{resident.id}}</p>
-            <h2 style=""><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
+            <p style="font-size: 16px; text-align:right; margin-bottom:10px;">Invoice no. {{resident.id}}</p>
+            <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit
+                    {{resident.room_number}}</strong></h2>
             <p style="padding-top:20px;">{{ date }}</p>
             <p>Report <span>From {{ startdate|date:"m/d/Y" }} To {{ enddate|date:"m/d/Y" }}<span></p>
-                
-                <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
+
+            <h2><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }}</strong></h2>
             <p style="text-align: right; font-weight:bold;">Opening balance: $0<span></p>
-            
-           <table class="table transaction-table">
+
+            <table class="table transaction-table">
                 <thead class="thead-light">
                     <tr>
                         <th class="maroon">Date</th>
@@ -78,24 +109,26 @@
                     {% for fee in rental_fees %}
                     <tr>
                         <td>{{ fee.date }}</td>
-                        <td>Rent/Care</td>
+                        <td>Rent/Care for {{ startdate|date:"M" }}-{{ enddate|date:"M"}} {{ startdate|date:"Y" }} </td>
                         <td>${{ fee.amount }}</td>
                         <td>{% if not fee.paid %}Not Paid{% else %}Paid{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table> 
-    
-            <p  class="maroon" style="text-align: right; font-weight:bold;">Total Amount: ${{total_amount}}</p>
-            <p class="maroon">Signed By: __________________________</p>
-            <p class="maroon">* If you wish to add money to the rental fee account, please forward it to the office. *</p>
+            </table>
+
+            <p class="maroon" style="text-align: right; font-weight:bold;">Total Amount: ${{total_amount}}</p>
             <br>
             {% if all_paid %}
-            <img style="width: 150px;padding: 20px; text-align: center;" src="https://png.pngtree.com/png-clipart/20230317/original/pngtree-paid-stamp-vector-illustration-png-image_8991938.png" alt="Paid Stamp">
-        {% endif %}
-            <p style="text-align: center;">THE RIGHT CHOICE FOR QUALITY LIVING</p>
+            <img style="width: 150px;padding: 20px; text-align: center;"
+                src="https://png.pngtree.com/png-clipart/20230317/original/pngtree-paid-stamp-vector-illustration-png-image_8991938.png"
+                alt="Paid Stamp">
+            {% endif %}
+            <p style="text-align: center;font-family: 'CenturyGothic'">THE RIGHT CHOICE FOR QUALITY LIVING
+            </p>
         </div>
     </div>
-    
+
 </body>
+
 </html>

@@ -9,6 +9,7 @@ urlpatterns = [
     path('search/', login_required(views.search_residents), name='search_residents'),
     path('resident/<int:id>/', login_required(views.resident_detail), name='resident_detail'),
     path('add_resident/', login_required(views.add_resident), name='add_resident'),
+    path('email_logs/', login_required(views.email_logs), name='email_logs'),
     path('edit_resident/<int:id>/', login_required(views.edit_resident), name='edit_resident'),
     # path('delete_rental_fee/', login_required(views.delete_rental_fee, name='delete_rental_fee'),
     # path('delete_petty_cash/', login_required(views.delete_petty_cash, name='delete_petty_cash'),

@@ -25,7 +25,7 @@
                 <p><i class="bi bi-person-fill"></i> <strong>First Name: </strong> {{ resident.resident_first_name }}</p>
                 <p><i class="bi bi-person-fill"></i> <strong>Last Name:</strong> {{ resident.resident_last_name }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Room Number:</strong> {{ resident.room_number }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Ohip#:</strong> {{ resident.ohip }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Health Card Number#:</strong> {{ resident.ohip }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Date of Birth:</strong> {{ resident.date_of_birth }}</p>
                 <p><i class="bi bi-envelope-fill"></i> <strong>Admission Date:</strong>{{ resident.admission_date }}</p>
                 <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Date:</strong>{{ resident.discharge_date }}</p>
@@ -38,12 +38,11 @@
         <div class="card ">
             <div class="card-body">
                 <h5 class="card-title">Contact 1: </h5>
-                <p><i class="bi bi-person-fill"></i> <strong>Contact Name:</strong> {{ resident.contact_name }}</p>
-                <p><i class="bi bi-person-fill"></i> <strong>Relation 1:</strong> {{ resident.relation1 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Phone Number:</strong> {{ resident.phone_number }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Work Number:</strong> {{ resident.work_number }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Cell Number:</strong> {{ resident.cell_number }}</p>
-                <p><i class="bi bi-envelope-fill"></i> <strong>Email Address:</strong> {{ resident.email_address }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Name:</strong> {{ resident.contact_name }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Relationship:</strong> {{ resident.relation1 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Home PH:</strong> {{ resident.phone_number }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Cell PH:</strong> {{ resident.cell_number }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Email:</strong> {{ resident.email_address }}</p>
                 
 
             </div>
@@ -53,11 +52,10 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Contact 2:</h5>
-                <p><i class="bi bi-person-fill"></i> <strong>Contact Name: </strong> {{ resident.contact_name2 }}</p>
-                <p><i class="bi bi-person-fill"></i> <strong>Relation:</strong> {{ resident.relation2 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Phone Number:</strong> {{ resident.phone_number_contact2 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Cell Number:</strong> {{ resident.cell_number_contact2 }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Work Number:</strong> {{ resident.work_number_contact2 }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Name: </strong> {{ resident.contact_name2 }}</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Relationship:</strong> {{ resident.relation2 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Home PH:</strong> {{ resident.phone_number_contact2 }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Cell PH:</strong> {{ resident.cell_number_contact2 }}</p>
                 <p><i class="bi bi-envelope-fill"></i> <strong>Email Address: &nbsp;</strong>{{ resident.email_address_contact2 }}</p>
             </div>
         </div>
