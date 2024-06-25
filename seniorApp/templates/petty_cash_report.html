@@ -84,11 +84,12 @@
             Previous Balance:
             $0</p>
         {% endif %}
-
+        
+        
         <div style="padding:0px 40px;">
             <table class="table transaction-table" style="padding:0px 40px; margin: 0px 20px;">
                 <thead class="thead-light" style="padding:0px 40px;background-color:warning;">
-                    <tr style="padding:0px 40px; font-family: 'Courier New', Courier, monospace; font-weight: 300;">
+                    <tr style="padding:0px 40px; font-family: Arial, Helvetica, sans-serif; font-weight:100;">
                         <th style="padding-top:10px;">DATE</th>
                         <th style="padding-top:10px;">ITEM DESCRIPTION</th>
                         <th style="padding-top:10px;">AMOUNT</th>
@@ -107,7 +108,7 @@
                                 $&nbsp;{{ transaction.deposit }}
                             {% endif %}
                         </td>
-                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">$&nbsp;{{ transaction.balance }}</td>
+                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">&nbsp;${{ transaction.balance }}</td>
                     </tr>
                     
                     

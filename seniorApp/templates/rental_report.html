@@ -30,7 +30,7 @@
         .resident-details {
             margin-bottom: 20px;
         }
-
+     
         .transaction-table th,
         .transaction-table td {
             border: 1px solid #dee2e6;
@@ -126,7 +126,7 @@
                     {% for fee in rental_fees %}
                     <tr>
                         <td>{{ fee.date }}</td>
-                        <td>Rent/Care for {{ startdate|date:"M" }}-{{ enddate|date:"M"}} {{ startdate|date:"Y" }} </td>
+                        <td>Rent/Care for {{fee.month}} {{ startdate|date:"Y" }}</td>
                         <td>${{ fee.amount }}</td>
                         <td>{% if not fee.paid %}Not Paid{% else %}Paid{% endif %}</td>
                     </tr>
