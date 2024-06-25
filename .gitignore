@@ -138,5 +138,4 @@ GitHub.sublime-settings
 .history
 senior_home_portal/settings.py
 seniorApp/migrations/0001_initial.py
-seniorApp/migrations/0001_initial.py
-seniorApp/migrations/0001_initial.py
+seniorApp/migrations/*

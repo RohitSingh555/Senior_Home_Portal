@@ -79,27 +79,27 @@ import pymysql
 pymysql.version_info = (1, 4, 13, "final", 0)
 pymysql.install_as_MySQLdb()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'senior', 
-        'USER': 'root', 
-        'PASSWORD': 'root',  
-        'HOST': 'localhost', 
-        'PORT': '3306',
-    }
-}
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'lchaimre_seniorportal', 
-#         'USER': 'lchaimre_testuser', 
+#         'NAME': 'senior', 
+#         'USER': 'root', 
 #         'PASSWORD': 'Umang@123',  
-#         'HOST': '199.68.177.41', 
+#         'HOST': 'localhost', 
 #         'PORT': '3306',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lchaimre_seniorportal', 
+        'USER': 'lchaimre_testuser', 
+        'PASSWORD': 'Umang@123',  
+        'HOST': '199.68.177.41', 
+        'PORT': '3306',
+    }
+}
 
 
 # Password validation
