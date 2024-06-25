@@ -54,19 +54,19 @@
 
 <body>
     <table class="heading_section" style="color: white; background-color:#383838;">
-        <tr style="padding: 10px 20px; text-align: center;">
-            <td style="padding: 40px 0px; text-align: center;width:35%">
+        <tr style="padding: 5px 20px; text-align: center;">
+            <td style="padding: 30px 0px; text-align: left;width:35%">
                 <h1 class="report-heading" style="font-size: 34px; font-weight:lighter;width: 150px; padding-left: 40px;">PETTY CASH REPORT</h1>
 
             </td>
             <td style="color: #dddddd;">
                 <img style="width: 150px;padding: 20px; text-align: right;"
                     src="https://i.pinimg.com/736x/82/07/7c/82077c3b7883c1ef8496dc5a69841fa4.jpg" alt="Logo">
-                <p class="headertext" style="margin: 0; text-align: right;padding:10px 0px; font-size:14px;">718
+                <p class="headertext" style="margin: 0; text-align: right;padding:5px 20px; font-size:14px;">718
                     Sheppard Avenue West&nbsp;&nbsp;Toronto&nbsp;&nbsp;ON&nbsp;&nbsp;M3H 2S6</p>
-                <p style="margin: 0;text-align: right;padding:0px 10px;font-size:14px;">Phone: 416-398-7898 Fax:
+                <p style="margin: 0;text-align: right;padding:5px 20px;font-size:14px;">Phone: 416-398-7898 Fax:
                     416-398-3909</p>
-                <p style="margin: 0;text-align: right;padding:0px 10px;font-size:14px;">LchaimRetirement.ca</p>
+                <p style="margin: 0;text-align: right;padding:5px 20px;font-size:14px;">LchaimRetirement.ca</p>
             </td>
         </tr>
     </table>
@@ -78,42 +78,43 @@
 
         {% if closest_previous_balance is not None and closest_previous_balance != 0 %}
         <p class="headinghr" style="text-align: right; font-weight: bold; padding:10px 40px 0px 40px; font-size:22px;">
-            Previous balance: ${{ closest_previous_balance|stringformat:"s" }}</p>
+            Previous Balance: ${{ closest_previous_balance|stringformat:"s" }}</p>
         {% else %}
         <p class="headinghr" style="text-align: right; font-weight: medium; padding:10px 40px 0px 40px;font-size:22px;">
-            Previous balance:
+            Previous Balance:
             $0</p>
         {% endif %}
 
-
-        <table class="table transaction-table" style="padding:0px 40px;">
-            <thead class="thead-light" style="padding:0px 40px;background-color:warning;">
-                <tr style="padding:0px 40px; font-family: 'Courier New', Courier, monospace; font-weight: 300;">
-                    <th style="padding-top:10px;">DATE</th>
-                    <th style="padding-top:10px;">ITEM DESCRIPTION</th>
-                    <th style="padding-top:10px;">AMOUNT</th>
-                    <th style="padding-top:10px;">BALANCE</th>
-                </tr>
-            </thead>
-            <tbody style="padding:0px 40px; ">
-                {% for transaction in petty_cash_transactions %}
-                <tr style="{% cycle 'background-color: #ffffff;' 'background-color: #e7e7e7' %}">
-                    <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.date }}</td>
-                    <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.petty_cash_type }}</td>
-                    <td style="padding-top:10px; {% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">
-                        {% if transaction.withdrawl > 1 %}
-                            $&nbsp;{{ transaction.withdrawl }}
-                        {% elif transaction.deposit > 1 %}
-                            $&nbsp;{{ transaction.deposit }}
-                        {% endif %}
-                    </td>
-                    <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">$&nbsp;{{ transaction.balance }}</td>
-                </tr>
-                
-                
-                {% endfor %}
-            </tbody>
-        </table>
+        <div style="padding:0px 40px;">
+            <table class="table transaction-table" style="padding:0px 40px; margin: 0px 20px;">
+                <thead class="thead-light" style="padding:0px 40px;background-color:warning;">
+                    <tr style="padding:0px 40px; font-family: 'Courier New', Courier, monospace; font-weight: 300;">
+                        <th style="padding-top:10px;">DATE</th>
+                        <th style="padding-top:10px;">ITEM DESCRIPTION</th>
+                        <th style="padding-top:10px;">AMOUNT</th>
+                        <th style="padding-top:10px;">BALANCE</th>
+                    </tr>
+                </thead>
+                <tbody style="padding:0px 40px; ">
+                    {% for transaction in petty_cash_transactions %}
+                    <tr style="{% cycle 'background-color: #ffffff;' 'background-color: #e7e7e7' %}">
+                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.date }}</td>
+                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.petty_cash_type }}</td>
+                        <td style="padding-top:10px; {% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">
+                            {% if transaction.withdrawl > 1 %}
+                                $&nbsp;{{ transaction.withdrawl }}
+                            {% elif transaction.deposit > 1 %}
+                                $&nbsp;{{ transaction.deposit }}
+                            {% endif %}
+                        </td>
+                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">$&nbsp;{{ transaction.balance }}</td>
+                    </tr>
+                    
+                    
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
 
         <p class=" headinghr-top"

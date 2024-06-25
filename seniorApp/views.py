@@ -416,6 +416,13 @@ def sendemail_yearly(request, id, startdate, enddate):
                 <p>E. deborah@lchaimretirement.ca</p>
                 <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
             </p>
+            <br/>
+            <p>
+                <h3 style="font-style: italic; color: #333; font-family: 'Times New Roman', Times, serif;">
+                    The Right Choice For Quality Living
+                </h3>
+                <p style="font-size:12px; font-style: italic; color: #333;"><i>This message is confidential and may be privileged. If you are not the intended recipient, please notify me and permanently delete this message and any attachments without reading it or making a copy. </p>
+            </p>
         </body>
         </html>
         """
@@ -529,6 +536,13 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
                 <p>E. deborah@lchaimretirement.ca</p>
                 <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
             </p>
+             <br/>
+            <p>
+                <h3 style="font-style: italic; color: #333; font-family: 'Times New Roman', Times, serif;">
+                    The Right Choice For Quality Living
+                </h3>
+                <p style="font-size:12px; font-style: italic; color: #333;"><i>This message is confidential and may be privileged. If you are not the intended recipient, please notify me and permanently delete this message and any attachments without reading it or making a copy. </p>
+            </p>
         </body>
         </html>
         """
@@ -621,6 +635,13 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
                 <p>P. 416-398-7898 Ext. 222</p>
                 <p>E. deborah@lchaimretirement.ca</p>
                 <p>W. <a href="http://www.lchaimretirement.ca" style="color: #808080;">www.lchaimretirement.ca</a></p>
+            </p>
+             <br/>
+            <p>
+                <h3 style="font-style: italic; color: #333; font-family: 'Times New Roman', Times, serif;">
+                    The Right Choice For Quality Living
+                </h3>
+                <p style=" font-size:10px; font-style: italic; color: #333;"><i>This message is confidential and may be privileged. If you are not the intended recipient, please notify me and permanently delete this message and any attachments without reading it or making a copy. </p>
             </p>
         </body>
         </html>

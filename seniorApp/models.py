@@ -30,7 +30,7 @@ class Residents(models.Model):
     email_address_contact2 = models.EmailField()
     notes = models.TextField()
     room_number = models.CharField(max_length=50,blank=True, null=True)
-    ohip = models.CharField(max_length=20,blank=True, null=True)
+    Health_Card_Number = models.CharField(max_length=20,blank=True, null=True)
     date_of_birth = models.DateTimeField(default='1990-01-01 00:00:00', null=True)
     DNR = models.BooleanField(default=False)
     admission_date = models.DateTimeField(default='1990-01-01 00:00:00', null=True)

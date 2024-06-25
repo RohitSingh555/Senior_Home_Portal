@@ -157,7 +157,7 @@ EMAIL_HOST_PASSWORD = "Rub2484@"
 
 LOGIN_URL = '/login'
 
-STATIC_ROOT = '/home/lchaimre/app.lchaimretirement.ca/static'
+# STATIC_ROOT = '/home/lchaimre/app.lchaimretirement.ca/static'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),

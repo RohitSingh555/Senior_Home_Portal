@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Report</title>
+    <title>End of the Year Report</title>
     <style>
         /* Add your custom CSS styles here */
         body {
@@ -18,7 +18,7 @@
             font-weight: medium;
             padding:0px;
             margin:0px;
-            padding:0px 100px;
+            padding:0px 80px;
         }
         .container {
             margin: 0 auto;
@@ -48,8 +48,8 @@
         
         <div class="letter-body">
             <table class="heading_section" style="color: white; background-color: #383838; width: 100%; ">
-                <tr style="padding: 10px 10px;">
-                    <td style="padding: 40px 0px; text-align: center;width:37%;">
+                <tr style="padding: 5px 10px;">
+                    <td style="padding: 30px 10px; text-align: left;width:37%;">
                         <h1 class="report-heading" style="font-size: 30px;">YEARLY STATEMENT</h1>
                     </td>
                     <td>
@@ -69,14 +69,14 @@
             <p style="padding-top:20px;">{{ date }}</p>
             <br>
             <p >To Whom it may concern,</p>
-            <h2 style="font-size: 25px;padding:0px 100px;"><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
+            <h2 style="font-size: 25px;padding:0px 80px;"><strong>{{ resident.resident_first_name }} {{ resident.resident_last_name }},&nbsp; Unit {{resident.room_number}}</strong></h2>
             <p>Has paid the total of: </p>
-            <p class="text-dark font-weight-bold " style="font-size: 25px; font-weight:bold; ">$&nbsp;{{ total_amount|floatformat:"2" }}</p>
+            <p class="text-dark font-weight-bold " style="font-size: 25px; ">${{ total_amount|floatformat:"2" }}</p>
             <p>to L’chaim Retirement Home for the period spanning <span> {{ startdate }} To {{ enddate }}.<span>  The breakdown of this amount is as follows:</p>
                 <br>
-            <p style=" font-weight:medium;">Rent: $&nbsp;{{twenty_percent}}</p>
-            <p style=" font-weight:medium;">Personal Care: $&nbsp;{{sixty_percent}}</p>
-            <p style=" font-weight:medium;">Food & Utilities: $&nbsp;{{twenty_percent_again}}</p>
+            <p style=" font-weight:medium;">Rent: $&nbsp;{{twenty_percent|floatformat:"2" }}</p>
+            <p style=" font-weight:medium;">Personal Care: $&nbsp;{{sixty_percent|floatformat:"2" }}</p>
+            <p style=" font-weight:medium;">Food & Utilities: $&nbsp;{{twenty_percent_again|floatformat:"2" }}</p>
 <br>
             
             <p>L’chaim Retirement Home is a private home that specializes in round the clock 24-hour
@@ -87,6 +87,7 @@
                 transfers, mechanical lifts, night supervision and monitoring.</p>
                 <br>
             <p>Yours truly,</p>
+            <br>
             <br>
             <p>Judy Cohen</p>
             
