@@ -121,7 +121,7 @@
 
         <p class=" headinghr-top"
             style="text-align: right;font-size:24px; font-weight:bold; padding:10px 40px 0px 40px; width:100px">
-            Amount Due: $&nbsp; {% if balance < 0 %}0{% else %}{{ balance|stringformat:"s" }}{% endif %}</p>
+            Amount Due: $&nbsp; {{ balance|stringformat:"s" }}</p>
 
 
         <p style="padding:0px 20px;font-size:15px; color: gray;">
