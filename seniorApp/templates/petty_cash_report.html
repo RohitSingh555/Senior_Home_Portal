@@ -100,7 +100,8 @@
                     {% for transaction in petty_cash_transactions %}
                     <tr style="{% cycle 'background-color: #ffffff;' 'background-color: #e7e7e7' %}">
                         <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.date }}</td>
-                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{{ transaction.petty_cash_type }}</td>
+                        
+                        <td style="padding-top:10px;{% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">{% if transaction.deposit > 1 %}Payment{% else %}{{ transaction.petty_cash_type }}{% endif %}</td>
                         <td style="padding-top:10px; {% if transaction.deposit > 1 %}color: #ED7D31;{% endif %}">
                             {% if transaction.withdrawl > 1 %}
                                 $&nbsp;{{ transaction.withdrawl }}
@@ -120,11 +121,11 @@
 
         <p class=" headinghr-top"
             style="text-align: right;font-size:24px; font-weight:bold; padding:10px 40px 0px 40px; width:100px">
-            Amount Due: $&nbsp;{{ balance|stringformat:"s" }}</p>
+            Amount Due: $&nbsp; {% if balance < 0 %}0{% else %}{{ balance|stringformat:"s" }}{% endif %}</p>
 
 
-        <p style="padding:0px 20px;font-size:15px; color: gray;">Kindly pay upon receipt. Payments can be made by e-transfer to
-            <b>judy@lchaimretirement.ca</b> or by cheque payable to L'chaim Retirement Home.
+        <p style="padding:0px 20px;font-size:15px; color: gray;">
+            I hope you're doing well. Attached is the Petty Cash Report for services provided at L'chaim Retirement Home. Kindly send an e-transfer to <b>payments@lchaimretirement.ca</b>
         </p>
         {% if all_paid %}
         <img style="width: 200px;padding: 20px; text-align: center;"

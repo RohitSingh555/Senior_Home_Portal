@@ -25,10 +25,10 @@
                 <p><i class="bi bi-person-fill"></i> <strong>First Name: </strong> {{ resident.resident_first_name }}</p>
                 <p><i class="bi bi-person-fill"></i> <strong>Last Name:</strong> {{ resident.resident_last_name }}</p>
                 <p><i class="bi bi-telephone-fill"></i> <strong>Room Number:</strong> {{ resident.room_number }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Health Card Number:</strong> {{ resident.ohip }}</p>
-                <p><i class="bi bi-telephone-fill"></i> <strong>Date of Birth:</strong> {{ resident.date_of_birth }}</p>
-                <p><i class="bi bi-envelope-fill"></i> <strong>Admission Date:</strong>{{ resident.admission_date }}</p>
-                <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Date:</strong>{{ resident.discharge_date }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Health Card Number:</strong> {{ resident.Health_Card_Number }}</p>
+                <p><i class="bi bi-telephone-fill"></i> <strong>Date of Birth:</strong> {{ resident.date_of_birth|date:"Y-m-d"  }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Admission Date:</strong>{{ resident.admission_date|date:"Y-m-d" }}</p>
+                <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Date:</strong>{{ resident.discharge_date|date:"Y-m-d" }}</p>
                 <p><i class="bi bi-envelope-fill"></i> <strong>Discharge Info:</strong>{{ resident.reason_for_discharge }}</p>
 
             </div>
@@ -94,7 +94,7 @@
                             <th>Type</th>
                             <th>Payments</th>
                             <th>Price</th>
-                            <th>Balance</th>
+                            <th>Balance Due</th>
                             <th>Actions</th> <!-- Add a column for actions -->
                         </tr>
                     </thead>
@@ -134,15 +134,15 @@
                                 <!-- Button to open edit modal -->
                                 <div class="d-flex ">
                                     {% if forloop.last %}
-                                <button type="button" class="btn mr-2" data-toggle="modal" data-target="#editPettyCashModal{{ petty_cash.id }}">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <form method="post" >
-                                    {% csrf_token %}
-                                    <input type="hidden" name="petty_cash_id_delete" value="{{ petty_cash.id }}">
-                                    <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
-                                </form>
-                                {% endif %}
+                                        <button type="button" class="btn mr-2 d-none" data-toggle="modal" data-target="#editPettyCashModal{{ petty_cash.id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form method="post" >
+                                            {% csrf_token %}
+                                            <input type="hidden" name="petty_cash_id_delete" value="{{ petty_cash.id }}">
+                                            <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                        {% endif %}
                                 </div>
                 
                                 <!-- Edit Petty Cash Modal -->
@@ -168,14 +168,14 @@
                                             </div>
                                             <div class="form-group">
                                                 {% if petty_cash.type == 'Deposit' %}
-                                                    <label for="id_deposit{{ petty_cash.id }}">Deposit:</label>
+                                                    <label for="id_deposit{{ petty_cash.id }}">Payment Amount:</label>
                                                     <input type="number" class="form-control" id="deposit{{ petty_cash.id }}" name="deposit" value="{{ petty_cash.deposit }}">
                                                 {% else %}
-                                                    <label for="id_withdrawal{{ petty_cash.id }}">Withdrawl:</label>
+                                                    <label for="id_withdrawal{{ petty_cash.id }}">Service Amount:</label>
                                                     <input type="number" class="form-control" id="withdrawal{{ petty_cash.id }}" name="withdrawl" value="{{ petty_cash.withdrawl }}">
                                                 {% endif %}
                                             </div>
-                                            <div class="form-group" type="{% if petty_cash.type != 'Withdrawl' %}hidden{% endif %}">
+                                            <div class="form-group" class="{% if petty_cash.type != 'Withdrawl' %}hidden{% endif %}">
                                                 
                                                 <label for="petty_cash_type{{ petty_cash.id }}">Petty Cash Type:</label>
                                                 <select class="form-control" id="petty_cash_type{{ petty_cash.id }}" name="petty_cash_type">
@@ -249,7 +249,7 @@
                                 
                                 <!-- Button to open edit modal -->
                                 <div class="d-flex ">
-                                <button type="button" class="btn mr-3" data-toggle="modal" data-target="#editRentalFeeModal{{ fee.id }}">
+                                <button type="button" class="btn mr-3 d-none" data-toggle="modal" data-target="#editRentalFeeModal{{ fee.id }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <form method="post" >
@@ -456,8 +456,60 @@
             <div class="modal-body">
                 <div class="form-container">
             <form method="post">
-              {% csrf_token %}
-              {{ petty_form.as_p }}
+             
+              
+                {% csrf_token %}
+                <p>
+                    <label for="id_type">Type:</label>
+                    <select name="type" id="id_type">
+                        <option value="Withdrawl">Service</option>
+                    
+                        <option value="Deposit">Payment</option>
+                
+                    </select>
+                    
+                    
+                </p>
+                
+                    
+                <p>
+                    <label for="id_deposit">Payment Amount:</label>
+                    <input type="number" name="deposit" value="0" step="0.01" id="id_deposit" style="display: none;">
+                
+                
+                </p>
+            
+                
+                <p>
+                    <label for="id_withdrawl">Service Amount:</label>
+                    <input type="number" name="withdrawl" value="0" step="0.01" id="id_withdrawl" style="display: block;">
+                    
+                
+                </p>
+            
+                
+                <p>
+                    <label for="id_petty_cash_type">Service Type:</label>
+
+                    <select class="form-control" id="id_petty_cash_type" name="petty_cash_type" style="display: block;">
+                        {% for petty_cash_type in petty_cash_types %}
+                            <option value="{{ petty_cash_type.id }}">{{ petty_cash_type.type }}</option>
+                        {% endfor %}
+                    </select>
+                
+                
+                </p>
+                
+                    
+                <p>
+                    <label for="id_date">Date:</label>
+                    <input type="date" name="date" required="" id="id_date">
+                
+                
+                    
+                
+                </p>
+    
               <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>

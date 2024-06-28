@@ -31,9 +31,9 @@
             <td>{{ resident.resident_first_name }}</td>
             <td>{{ resident.resident_last_name }}</td>
             <td>{{ resident.room_number }}</td>
-            <td>{{ resident.ohip }}</td>
-            <td>{{ resident.date_of_birth }}</td>
-            <td>{{ resident.discharge_date }}</td>
+            <td>{{ resident.Health_Card_Number }}</td>
+            <td>{{ resident.date_of_birth|date:"Y-m-d" }}</td>
+            <td>{{ resident.discharge_date|date:"Y-m-d" }}</td>
             <td>{{ resident.reason_for_discharge }}</td>
             <td>{{ resident.notes }}</td>
 

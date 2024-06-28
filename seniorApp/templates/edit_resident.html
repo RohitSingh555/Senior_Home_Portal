@@ -7,11 +7,135 @@
   <h1 class="text-center fw-bold mb-4">Edit Resident</h1>
   <div class="row justify-content-center">
     <div class="form-container">
-      <form method="post">
-          {% csrf_token %}
+      <!-- <form method="post">
           {{form.as_p}}
           <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
+      </form> -->
+
+      <form method="post">
+        {% csrf_token %}
+        <p>
+            <label for="{{ form.resident_first_name.id_for_label }}">Resident first name:</label>
+            {{ form.resident_first_name }}
+        </p>
+    
+        <p>
+            <label for="{{ form.resident_last_name.id_for_label }}">Resident last name:</label>
+            {{ form.resident_last_name }}
+        </p>
+        <h3>
+          CONTACT 1
+        </h3>
+        <div class="border p-4 my-3">
+        <p>
+            <label for="{{ form.contact_name.id_for_label }}">Name:</label>
+            {{ form.contact_name }}
+        </p>
+    
+        <p>
+            <label for="{{ form.relation1.id_for_label }}">Relationship:</label>
+            {{ form.relation1 }}
+        </p>
+    
+        <p>
+            <label for="{{ form.phone_number.id_for_label }}">Home PH:</label>
+            {{ form.phone_number }}
+        </p>
+    
+        <p>
+            <label for="{{ form.cell_number.id_for_label }}">Cell PH:</label>
+            {{ form.cell_number }}
+        </p>
+    
+        <p>
+            <label for="{{ form.email_address.id_for_label }}">Email:</label>
+            {{ form.email_address }}
+        </p>
+    
+        <p>
+            <label for="{{ form.POA_contact1.id_for_label }}">POA:</label>
+            {{ form.POA_contact1 }}
+        </p>
+      </div>
+        
+
+        <h3>
+          CONTACT 2
+        </h3>
+        <div class="border p-4 my-3">
+        <p>
+            <label for="{{ form.contact_name2.id_for_label }}">Name:</label>
+            {{ form.contact_name2 }}
+        </p>
+    
+        <p>
+            <label for="{{ form.relation2.id_for_label }}">Relationship:</label>
+            {{ form.relation2 }}
+        </p>
+
+        <p>
+            <label for="{{ form.phone_number_contact2.id_for_label }}">Home PH:</label>
+            {{ form.phone_number_contact2 }}
+        </p>
+    
+        <p>
+            <label for="{{ form.cell_number_contact2.id_for_label }}">Cell PH:</label>
+            {{ form.cell_number_contact2 }}
+        </p>
+    
+        <p>
+            <label for="{{ form.POA_contact2.id_for_label }}">POA:</label>
+            {{ form.POA_contact2 }}
+        </p>
+    
+        <p>
+            <label for="{{ form.email_address_contact2.id_for_label }}">Email:</label>
+            {{ form.email_address_contact2 }}
+        </p>
+        </div>
+        <p>
+            <label for="{{ form.notes.id_for_label }}">Notes:</label>
+            {{ form.notes }}
+        </p>
+    
+        <p>
+            <label for="{{ form.room_number.id_for_label }}">Room number:</label>
+            {{ form.room_number }}
+        </p>
+    
+        <p>
+            <label for="{{ form.Health_Card_Number.id_for_label }}">Health Card Number:</label>
+            {{ form.Health_Card_Number }}
+        </p>
+    
+        <p>
+            <label for="{{ form.date_of_birth.id_for_label }}">Date of birth:</label>
+            {{ form.date_of_birth }}
+        </p>
+    
+        <p>
+            <label for="{{ form.DNR.id_for_label }}">DNR:</label>
+            {{ form.DNR }}
+        </p>
+    
+        <p>
+            <label for="{{ form.admission_date.id_for_label }}">Admission date:</label>
+            {{ form.admission_date }}
+        </p>
+    
+        <p>
+            <label for="{{ form.discharge_date.id_for_label }}">Discharge date:</label>
+            {{ form.discharge_date }}
+        </p>
+    
+        <p>
+            <label for="{{ form.reason_for_discharge.id_for_label }}">Reason for discharge:</label>
+            {{ form.reason_for_discharge }}
+        </p>
+    
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    
   </div>
   </div>
 </div>

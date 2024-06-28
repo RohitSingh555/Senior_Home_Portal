@@ -17,14 +17,14 @@ class Residents(models.Model):
     contact_name = models.CharField(max_length=20,blank=True, null=True)
     relation1 = models.CharField(max_length=100,blank=True, null=True)
     phone_number = models.CharField(max_length=20,blank=True, null=True)
-    work_number = models.CharField(max_length=20,blank=True, null=True)
+    # work_number = models.CharField(max_length=20,blank=True, null=True)
     cell_number = models.CharField(max_length=20,blank=True, null=True)
     email_address = models.EmailField()
     POA_contact1 = models.CharField(max_length=100, choices=POA_choices, null=True, default='POA Care')
     contact_name2 = models.CharField(max_length=20,blank=True, null=True)
     relation2 = models.CharField(max_length=100,blank=True, null=True)
     phone_number_contact2 = models.CharField(max_length=20,blank=True, null=True)
-    work_number_contact2 = models.CharField(max_length=20,blank=True, null=True)
+    # work_number_contact2 = models.CharField(max_length=20,blank=True, null=True)
     cell_number_contact2 = models.CharField(max_length=20,blank=True, null=True)
     POA_contact2 = models.CharField(max_length=100, choices=POA_choices, null=True, default='POA Care')
     email_address_contact2 = models.EmailField()
@@ -66,7 +66,7 @@ class RentalFee(models.Model):
     def __str__(self):
         return self.resident.resident_first_name + ' ' + self.resident.resident_last_name +  ' - ' + self.month    
 
-class PettyCash(models.Model):
+class PettyCash(models.Model): #make withdrawl as service_amount, #make deposit to payment_amount, petty_cash_type to service_type
     ACTION_TYPES = [
         ('Withdrawl', 'Withdrawl'),
         ('Deposit', 'Deposit'),

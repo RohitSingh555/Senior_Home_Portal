@@ -6,9 +6,218 @@
 
 {% block content %}
 <h1 class="text-center pb-5">Add Resident</h1>
+
 <form method="post" class="form-container container" style="width:50%; margin:auto;">
     {% csrf_token %}
-    {{ form.as_p }} <!-- This will render the form fields -->
+    <p>
+    <label for="id_resident_first_name">Resident first name:</label>
+    <input type="text" name="resident_first_name" maxlength="100" required="" id="id_resident_first_name">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_resident_last_name">Resident last name:</label>
+    <input type="text" name="resident_last_name" maxlength="100" id="id_resident_last_name">
+    
+    
+  </p>
+  <h3>
+    CONTACT 1
+  </h3>
+  <div class="border p-4 my-3">
+
+  <p>
+    <label for="id_contact_name">Name:</label>
+    <input type="text" name="contact_name" maxlength="20" id="id_contact_name">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_relation1">Relationship:</label>
+    <input type="text" name="relation1" maxlength="100" id="id_relation1">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_phone_number">Home PH:</label>
+    <input type="text" name="phone_number" maxlength="20" id="id_phone_number">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_cell_number">Cell PH:</label>
+    <input type="text" name="cell_number" maxlength="20" id="id_cell_number">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_email_address">Email:</label>
+    <input type="email" name="email_address" maxlength="254" id="id_email_address">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_POA_contact1">POA:</label>
+    <select name="POA_contact1" id="id_POA_contact1">
+  <option value="POA Care" selected="">POA Care</option>
+
+  <option value="POA Financial">POA Financial</option>
+
+  <option value="POA Financial &amp; Care">POA Financial &amp; Care</option>
+
+  <option value="None">N/A</option>
+
+</select>
+    
+    
+  </p>
+</div>
+<h3>
+    CONTACT 2
+  </h3>
+  <div class="border p-4 my-3">
+  <p>
+    <label for="id_contact_name2">Name:</label>
+    <input type="text" name="contact_name2" maxlength="20" id="id_contact_name2">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_relation2">Relationship:</label>
+    <input type="text" name="relation2" maxlength="100" id="id_relation2">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_phone_number_contact2">Home PH:</label>
+    <input type="text" name="phone_number_contact2" maxlength="20" id="id_phone_number_contact2">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_cell_number_contact2">Cell PH:</label>
+    <input type="text" name="cell_number_contact2" maxlength="20" id="id_cell_number_contact2">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_POA_contact2">POA:</label>
+    <select name="POA_contact2" id="id_POA_contact2">
+  <option value="POA Care" selected="">POA Care</option>
+
+  <option value="POA Financial">POA Financial</option>
+
+  <option value="POA Financial &amp; Care">POA Financial &amp; Care</option>
+
+  <option value="None">N/A</option>
+
+</select>
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_email_address_contact2">Email</label>
+    <input type="email" name="email_address_contact2" maxlength="254" id="id_email_address_contact2">
+    
+    
+  </p>
+
+</div>
+  <p>
+    <label for="id_notes">Notes:</label>
+    <textarea name="notes" cols="40" rows="10" id="id_notes"></textarea>
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_room_number">Room number:</label>
+    <input type="text" name="room_number" maxlength="50" id="id_room_number">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_Health_Card_Number">Health Card Number:</label>
+    <input type="text" name="Health_Card_Number" maxlength="20" id="id_Health_Card_Number">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_date_of_birth">Date of birth:</label>
+    <input type="date" name="date_of_birth" required="" id="id_date_of_birth">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_DNR">DNR:</label>
+    <input type="checkbox" name="DNR" id="id_DNR">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_admission_date">Admission date:</label>
+    <input type="date" name="admission_date" id="id_admission_date">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_discharge_date">Discharge date:</label>
+    <input type="date" name="discharge_date" id="id_discharge_date">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_reason_for_discharge">Reason for discharge:</label>
+    <select name="reason_for_discharge" id="id_reason_for_discharge">
+  <option value="" selected="">---------</option>
+
+  <option value="MOVED">Moved to another home</option>
+
+  <option value="PASSED_LCHAIM">Passed away at L'chaim</option>
+
+  <option value="PASSED_HOSPITAL">Passed away in the hospital</option>
+
+</select>
+    
+    
+      
+    
+  </p> <!-- This will render the form fields -->
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}

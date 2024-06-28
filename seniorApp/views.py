@@ -115,6 +115,7 @@ def resident_detail(request, id):
 
         petty_cash_id = request.POST.get('petty_cash_id')
         print(petty_cash_id)
+        #reverse logic for balance like credit card statement
         if petty_cash_id: 
             petty_cash_instance = get_object_or_404(PettyCash, pk=petty_cash_id)
             old_withdrawl = petty_cash_instance.withdrawl
@@ -128,10 +129,10 @@ def resident_detail(request, id):
                 if petty_cash_instance.type == 'Withdrawl':
                     change = old_withdrawl - petty_form.withdrawl
                     print('change --> ' + str(change))
-                    petty_form.balance = old_balance + change
+                    petty_form.balance = old_balance - change
                 else: 
                     change = old_deposit - petty_form.deposit
-                    petty_form.balance = old_balance - change
+                    petty_form.balance = old_balance + change
 
                 petty_form.save()
                 return redirect('resident_detail', id=id)
@@ -142,14 +143,14 @@ def resident_detail(request, id):
                 petty_cash.resident = resident
                 if(petty_cash.type == 'Withdrawl'):
                     if (resident.pettycash_set.all().last()):
-                        petty_cash.balance = resident.pettycash_set.all().last().balance - petty_cash.withdrawl
+                        petty_cash.balance = resident.pettycash_set.all().last().balance + petty_cash.withdrawl
                     else:
-                        petty_cash.balance = -1* petty_cash.withdrawl
+                        petty_cash.balance = 1* petty_cash.withdrawl
                 else: 
                     if (resident.pettycash_set.all().last()):
-                        petty_cash.balance = resident.pettycash_set.all().last().balance + petty_cash.deposit
+                        petty_cash.balance = resident.pettycash_set.all().last().balance - petty_cash.deposit
                     else:
-                        petty_cash.balance = petty_cash.deposit
+                        petty_cash.balance = -1*petty_cash.deposit
                 petty_cash.save()
                 return redirect('resident_detail', id=id)
         
@@ -326,10 +327,10 @@ def generate_pdf_petty(request, id, startdate,enddate):
     balance = total_deposit - total_withdrawal
     if len(petty_cash_transactions) > 0:
         balance = petty_cash_transactions.last().balance
-    if balance >= 0:
-        balance = 0
-    else:
-        balance = abs(balance)
+    # if balance >= 0:
+    #     balance = 0
+    # else:
+    #     balance = abs(balance)
     print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
@@ -403,7 +404,7 @@ def sendemail_yearly(request, id, startdate, enddate):
         message = f"""
         <html>
         <body>
-            <p>Dear {resident.resident_first_name},</p>
+            <p>Dear {resident.contact_name},</p>
 
             <p>I hope you're doing well. Attached is the Yearly Report PDF for services provided at L'chaim Retirement Home. Kindly send an e-transfer to payments@lchaimretirement.ca.</p>
 
@@ -488,10 +489,10 @@ def sendemail_pdf_petty(request, id, startdate,enddate):
     balance = total_deposit - total_withdrawal
     if len(petty_cash_transactions) > 0:
         balance = petty_cash_transactions.last().balance
-    if balance >= 0:
-        balance = 0
-    else:
-        balance = abs(balance)
+    # if balance >= 0:
+    #     balance = 0
+    # else:
+    #     balance = abs(balance)
     print('Balance --> ' + str(balance))
     closest_previous_balance = PettyCash.objects.filter(date__lt=startdate_obj, resident=resident).order_by('-date').first()
     if closest_previous_balance:
@@ -619,15 +620,15 @@ def sendemail_pdf_rental(request, id, startdate,enddate):
 
     pdf_content.seek(0)
     
-    subject = 'Rental fee Report'
+    subject = 'L\'chaim Monthly Invoice'
     message = f"""
         <html>
         <body>
-            <p>Dear {resident.resident_first_name},</p>
+            <p>Dear {resident.contact_name},</p>
 
-            <p>I hope you're doing well. Attached is the Yearly Report PDF for services provided at L'chaim Retirement Home. Kindly send an e-transfer to payments@lchaimretirement.ca.</p>
+            <p>I hope you're doing well. Please see the attached paid monthly invoice.</p>
 
-            <p>Warmest Regards,</p><br>
+            <p>All the best</p><br>
 
             <p style="font-size: 14px; color: #808080;">
                 <h3 style="color: #808080;">L'chaim Retirement Home</h3>
